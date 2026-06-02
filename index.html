@@ -3317,7 +3317,7 @@ function submitObjection() {
 function renderOpsWinners() {
   const el = document.getElementById('ops-winners-content');
   if (!el) return;
-  const acts = Object.values(getActivities()).sort((a,b) => (b.createdAt||0)-(a.createdAt||0));
+  const acts = Object.values(getActivities()).sort((a,b) => new Date(b.createdAt||0)-new Date(a.createdAt||0));
   if (!acts.length) {
     el.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div>暂无活动</div></div>';
     return;
@@ -3409,7 +3409,7 @@ function doAuthorWLQuery() {
   const resultEl = document.getElementById('author-wl-query-result');
   resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#aaa">⏳ 正在查询...</div>';
   syncFromRemote().catch(()=>{}).finally(() => {
-    const acts = Object.values(getActivities()).filter(a => a.ip === 'sky');
+    const acts = Object.values(getActivities()).filter(a => a.ip === 'sky').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
     if (!acts.length) {
       resultEl.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>暂无活动</div></div>';
       return;
@@ -3461,7 +3461,7 @@ function doAuthorWinnerQuery() {
   const resultEl = document.getElementById('author-winner-query-result');
   resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#aaa">⏳ 正在查询...</div>';
   syncFromRemote().catch(()=>{}).finally(() => {
-    const acts = Object.values(getActivities()).filter(a => a.ip === 'sky');
+    const acts = Object.values(getActivities()).filter(a => a.ip === 'sky').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
     if (!acts.length) {
       resultEl.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div>暂无活动</div></div>';
       return;
@@ -3609,7 +3609,7 @@ function doAuthorObjStatusQuery() {
 
 function renderAuthorObjectionForm() {
   const el = document.getElementById('author-objection-form-wrap');
-  const acts = Object.values(getActivities()).filter(a => a.ip === 'sky');
+  const acts = Object.values(getActivities()).filter(a => a.ip === 'sky').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
   let html = `
     <div class="section" style="margin-bottom:16px">
       <div class="section-title">提交异议</div>
