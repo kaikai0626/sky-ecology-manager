@@ -566,7 +566,7 @@ tr:hover td{background:#fafafa}
     </div>
     <div class="form-group">
       <label>公示链接（在线文档）<span style="color:var(--red)">*</span></label>
-      <input type="text" class="form-input" id="winners-link" placeholder="https://...（飞书/腾讯文档均可）">
+      <input type="text" class="form-input" id="winners-link" placeholder="请填写在线文档地址（飞书/腾讯文档均可）">
     </div>
     <div class="form-group">
       <label>补充说明（选填）</label>
@@ -2455,7 +2455,7 @@ function openVendorEditDetail(actId) {
   const mode = d.mode || 'framework';
   const subHtml = (d.subActivities||[]).map((s,i) => renderSubActForm(s,i)).join('');
   document.getElementById('vendor-detail-form').innerHTML = `
-    <div class="alert alert-info" style="margin-bottom:12px">📌 建议点击「上传活动规则」提交链接给运营审核。</div>
+    <div class="alert alert-info" style="margin-bottom:12px">📌 建议点击「上传活动规则」提交在线文档给运营审核。</div>
     <div class="form-row" style="margin-bottom:4px">
       <div class="form-group"><label>活动开始时间 <span style="color:var(--red)">*</span></label><input type="datetime-local" class="form-input" id="vd-start" value="${d.startTime||''}"></div>
       <div class="form-group"><label>活动结束时间 <span style="color:var(--red)">*</span></label><input type="datetime-local" class="form-input" id="vd-end" value="${d.endTime||''}"></div>
@@ -2474,7 +2474,7 @@ function openVendorEditDetail(actId) {
       </div>
     </div>
     <div id="vd-upload-section" style="display:${mode==='upload'?'block':'none'}">
-      <div class="form-group"><label>活动规则链接</label><input type="text" class="form-input" id="vd-upload-link" placeholder="https://..." value="${d.uploadLink||''}"></div>
+      <div class="form-group"><label>活动规则链接</label><input type="text" class="form-input" id="vd-upload-link" placeholder="请填写在线文档" value="${d.uploadLink||''}"></div>
       <div class="form-group"><label>补充说明</label><textarea class="form-textarea" id="vd-upload-doc" style="min-height:120px" placeholder="可在此补充活动相关说明...">${d.uploadDoc||''}</textarea></div>
     </div>
     <div id="vd-framework-section" style="display:${mode!=='upload'?'block':'none'}">
