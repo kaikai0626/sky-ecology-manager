@@ -859,7 +859,7 @@ function showPage(role) {
   syncFromRemote().then(() => {
     if (role === 'ops') { renderOpsActivities(); updateDataSummary(); if(STATE.opsTab==='creators') renderOpsCreators(); }
     else if (role === 'vendor') renderVendorActivities();
-    else if (role === 'author') { /* author tab initializes on showPage */ }
+    else if (role === 'author') { authorTab(authorCurrentTab || 'whitelist'); }
   }).catch(()=>{});
 }
 
@@ -2249,15 +2249,16 @@ function vendorTab(tab) {
   tabs.forEach(t => {
     document.getElementById('vendor-tab-'+t).style.display = t===tab ? 'block' : 'none';
   });
-  if (tab === 'activities') renderVendorActivities();
-  if (tab === 'whitelist') renderVendorWhitelist();
-  if (tab === 'notes') renderVendorNotes();
-  if (tab === 'winners') renderVendorWinners();
-  if (tab === 'objections') {
-    renderVendorObjections();
-    // 切换到异议处理 Tab 时从 D1 拉最新数据并重渲染
-    syncFromRemote().then(() => renderVendorObjections()).catch(()=>{});
-  }
+  // 先渲染本地缓存（即时显示），同时从 D1 拉最新数据再重渲染
+  const renderMap = {
+    activities: renderVendorActivities,
+    whitelist: renderVendorWhitelist,
+    notes: renderVendorNotes,
+    winners: renderVendorWinners,
+    objections: renderVendorObjections
+  };
+  if (renderMap[tab]) renderMap[tab]();
+  syncFromRemote().then(() => { if (renderMap[tab]) renderMap[tab](); }).catch(()=>{});
 }
 
 function getVendorActivities() {
@@ -3400,6 +3401,10 @@ function authorTab(tab) {
     if (panelEl) panelEl.style.display = t === tab ? 'block' : 'none';
   });
   if (tab === 'objection') { renderAuthorObjStatus(); renderAuthorObjectionForm(); }
+  // 每次切 tab 都从 D1 拉最新数据
+  syncFromRemote().then(() => {
+    if (tab === 'objection') { renderAuthorObjStatus(); renderAuthorObjectionForm(); }
+  }).catch(()=>{});
 }
 
 // ---- Tab1: 白名单查询 ----
