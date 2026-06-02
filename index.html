@@ -1,0 +1,3782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>光遇 · 生态达人活动管理</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+:root{--red:#FF2442;--red-light:#fff0f2;--red-dark:#d41e38;--gray:#666;--border:#e8e8e8;--white:#fff;--shadow:0 2px 12px rgba(0,0,0,0.08)}
+
+/* Layout */
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* Nav */
+.nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:var(--red)}
+.nav-logo .logo-icon{width:32px;height:32px;background:transparent;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:900}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-tag{background:var(--red-light);color:var(--red);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:500}
+.btn-logout{background:none;border:1px solid var(--border);padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--gray)}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+/* Login Page */
+#page-login{background:linear-gradient(135deg,#fff0f2 0%,#fff 50%,#fff0f2 100%);min-height:100vh;display:none}
+#page-login.active{display:block}
+.login-screen{display:none;align-items:flex-start;justify-content:center;padding-top:80px;min-height:100vh;box-sizing:border-box}
+.login-screen.active{display:flex}
+.login-wrap{text-align:center;padding:40px 20px;width:100%}
+.login-title{font-size:28px;font-weight:800;color:var(--red);margin-bottom:8px}
+.login-sub{color:var(--gray);margin-bottom:48px;font-size:15px}
+.role-cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.role-card{background:var(--white);border:2px solid var(--border);border-radius:16px;padding:32px 28px;width:220px;cursor:pointer;transition:all .2s;text-align:center;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.role-card:hover{border-color:var(--red);box-shadow:0 8px 24px rgba(255,36,66,.15);transform:translateY(-2px)}
+.role-card.selected{border-color:var(--red);background:var(--red-light)}
+.role-icon{font-size:40px;margin-bottom:12px}
+.role-name{font-size:16px;font-weight:700;margin-bottom:6px}
+.role-desc{font-size:12px;color:var(--gray);line-height:1.5}
+
+/* IP selector */
+.ip-selector{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.ip-btn{background:var(--white);border:2px solid var(--border);border-radius:10px;padding:12px 24px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:8px}
+.ip-btn:hover{border-color:var(--red)}
+.ip-btn.selected{border-color:var(--red);background:var(--red-light);color:var(--red)}
+.ip-dot{width:10px;height:10px;border-radius:50%}
+
+/* Password input */
+.pwd-wrap{margin-top:24px;position:relative;z-index:5}
+.pwd-input{width:280px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-size:15px;outline:none;transition:border .2s}
+.pwd-input:focus{border-color:var(--red)}
+.btn-enter{margin-top:16px;background:var(--red);color:#fff;border:none;padding:13px 48px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;display:block;margin-left:auto;margin-right:auto;position:relative;z-index:10;pointer-events:auto;-webkit-appearance:none;touch-action:manipulation;width:100%;max-width:280px}
+.btn-enter:hover{background:var(--red-dark)}
+.err-msg{color:var(--red);font-size:13px;margin-top:8px}
+
+/* Tabs */
+.tabs{display:flex;border-bottom:2px solid var(--border);background:var(--white);margin-bottom:24px}
+.tab{padding:14px 24px;cursor:pointer;font-size:14px;font-weight:500;color:var(--gray);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab:hover{color:var(--red)}
+.tab.active{color:var(--red);border-bottom-color:var(--red);font-weight:700}
+
+/* IP filter bar */
+.ip-bar{background:var(--white);padding:16px 24px;margin-bottom:24px;display:flex;gap:10px;align-items:center;border-radius:10px;box-shadow:var(--shadow)}
+.ip-filter-btn{padding:7px 18px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;font-size:13px;font-weight:500;background:var(--white);transition:all .2s}
+.ip-filter-btn:hover{border-color:var(--red)}
+.ip-filter-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* Cards & Sections */
+.section{background:var(--white);border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.section-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'';display:block;width:4px;height:18px;background:var(--red);border-radius:2px}
+
+/* Activity cards */
+.activity-list{display:grid;gap:16px}
+.activity-card{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s}
+.activity-card:hover{border-color:var(--red);box-shadow:0 4px 16px rgba(255,36,66,.1)}
+.activity-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.activity-name{font-size:15px;font-weight:700}
+.activity-ip-tag{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.status-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.activity-meta{font-size:12px;color:var(--gray);display:flex;gap:16px}
+
+/* Status colors */
+.s-draft{background:#f5f5f5;color:#999}
+.s-vendor_detail_pending{background:#fff2e8;color:#d46b08;border:1.5px solid #ffd591}
+.s-whitelist_ready{background:#e8f4fd;color:#1890ff}
+.s-active{background:#f0fff4;color:#52c41a}
+.s-collecting{background:#fff7e6;color:#fa8c16}
+.s-vendor_review{background:#f9f0ff;color:#722ed1}
+.s-winners_published{background:#fff0f6;color:#eb2f96}
+.s-completed{background:#f6ffed;color:#389e0d}
+
+/* Creator management */
+.creator-card{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.creator-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.creator-screenshot{max-width:120px;max-height:80px;border-radius:6px;border:1px solid var(--border);cursor:pointer}
+.creator-screenshot-full{max-width:100%;border-radius:8px}
+.pending-dot{display:inline-block;width:8px;height:8px;background:var(--red);border-radius:50%;margin-right:6px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.ip-sky{background:#e8f4fd;color:#1890ff}
+.ip-nss{background:#fff7e6;color:#fa8c16}
+.ip-yy{background:#f9f0ff;color:#722ed1}
+
+/* Timeline */
+.timeline{display:flex;align-items:flex-start;overflow-x:auto;padding:20px 0;gap:0}
+/* vertical timeline */
+.tl-list{display:flex;flex-direction:column;gap:0;padding:4px 0}
+.tl-step{display:flex;align-items:flex-start;gap:14px;position:relative;padding-bottom:16px}
+.tl-step:not(:last-child)::before{content:'';position:absolute;left:15px;top:32px;width:2px;height:calc(100% - 4px);background:var(--border);z-index:0}
+.tl-step.done:not(:last-child)::before{background:var(--red)}
+.tl-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;position:relative;z-index:1;flex-shrink:0}
+.tl-step.done .tl-dot{background:var(--red);border-color:var(--red);color:#fff}
+.tl-step.current .tl-dot{border-color:var(--red);color:var(--red);box-shadow:0 0 0 4px rgba(255,36,66,.15)}
+.tl-label{font-size:11px;color:var(--gray);line-height:1.4}
+.tl-step.current .tl-label{color:var(--red);font-weight:600}
+.tl-step.done .tl-label{color:#333}
+.tl-time{font-size:10px;color:#aaa;margin-top:2px}
+
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#fafafa;padding:10px 12px;text-align:left;font-weight:600;color:var(--gray);border-bottom:2px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#fafafa}
+.no-data{text-align:center;padding:40px;color:#aaa;font-size:14px}
+
+/* Forms */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px}
+.form-input,.form-textarea,.form-select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;font-family:inherit;transition:border .2s}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--red)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* Buttons */
+.btn{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:hover{background:var(--red-dark)}
+.btn-outline{background:var(--white);border:1.5px solid var(--red);color:var(--red)}
+.btn-outline:hover{background:var(--red-light)}
+.btn-ghost{background:var(--white);border:1.5px solid var(--border);color:var(--gray)}
+.btn-ghost:hover{border-color:#999}
+.btn-danger{background:#fff2f0;border:1.5px solid #ffccc7;color:#f5222d}
+.btn-danger:hover{background:#ffccc7}
+.btn-success{background:#f6ffed;border:1.5px solid #b7eb8f;color:#389e0d}
+.btn-success:hover{background:#d9f7be}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Upload area */
+.upload-area{border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all .2s}
+.upload-area:hover{border-color:var(--red);background:var(--red-light)}
+.upload-icon{font-size:32px;margin-bottom:8px}
+.upload-hint{font-size:13px;color:var(--gray)}
+
+/* Modal */
+.modal-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-mask.show{display:flex}
+.modal{background:var(--white);border-radius:16px;padding:28px;width:90%;max-width:560px;max-height:85vh;overflow-y:auto;position:relative}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:20px}
+.modal-close{position:absolute;top:20px;right:20px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray);line-height:1}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* Search bar */
+.search-bar{display:flex;gap:10px;margin-bottom:16px}
+.search-input{flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none}
+.search-input:focus{border-color:var(--red)}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-item{background:var(--white);border-radius:10px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+.stat-num{font-size:24px;font-weight:800;color:var(--red)}
+.stat-label{font-size:12px;color:var(--gray);margin-top:4px}
+
+/* Alert */
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;display:flex;align-items:flex-start;gap:8px}
+.alert-info{background:#e8f4fd;color:#1890ff;border:1px solid #bae0ff}
+.alert-warn{background:#fff7e6;color:#fa8c16;border:1px solid #ffe58f}
+.alert-success{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f}
+
+/* Sub-activity */
+.sub-act-item{border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;position:relative}
+.sub-act-del{position:absolute;top:10px;right:10px;background:none;border:none;color:#aaa;cursor:pointer;font-size:16px}
+.sub-act-del:hover{color:var(--red)}
+
+/* Author status */
+.big-status{text-align:center;padding:40px 20px}
+.big-status-icon{font-size:64px;margin-bottom:16px}
+.big-status-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.big-status-sub{color:var(--gray);font-size:14px}
+
+/* Floating action */
+.fab{position:fixed;bottom:32px;right:32px;background:var(--red);color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(255,36,66,.4);z-index:200;transition:all .2s}
+.fab:hover{background:var(--red-dark);transform:scale(1.08)}
+
+/* Tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.tag-pending{background:#fff7e6;color:#fa8c16}
+.tag-approved{background:#f6ffed;color:#389e0d}
+.tag-rejected{background:#fff2f0;color:#f5222d}
+
+/* Progress bar */
+.progress{background:#f5f5f5;border-radius:4px;height:6px;overflow:hidden}
+.progress-bar{height:100%;background:var(--red);border-radius:4px;transition:width .3s}
+
+/* Toast */
+#toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;display:none;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+
+.main-content{padding:24px 0;min-height:calc(100vh - 56px)}
+.empty{text-align:center;padding:60px 20px;color:#aaa}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* Responsive */
+@media(max-width:768px){
+  .form-row{grid-template-columns:1fr}
+  .role-cards{gap:12px}
+  .role-card{width:160px;padding:20px 16px}
+  .container{padding:0 12px}
+  .tabs{overflow-x:auto;white-space:nowrap}
+  .tab{padding:12px 16px}
+}
+.tabs { background: linear-gradient(135deg,#fff 0%,#fef6f7 100%); border-bottom: 2px solid #ffe4e8; padding: 0 4px; }
+.tab { padding: 13px 18px; font-size: 13px; }
+.tab.active { color: var(--red); border-bottom: 3px solid var(--red); font-weight: 700; }
+.activity-card { border-radius: 12px; border: 1px solid #f0f0f0; box-shadow: 0 2px 8px rgba(0,0,0,.04); transition: box-shadow .2s; }
+.activity-card:hover { box-shadow: 0 4px 16px rgba(255,36,66,.10); }
+.nav { background: linear-gradient(135deg,#fff 0%,#fff8f9 100%); border-bottom: 2px solid #ffe4e8; }
+.section { border-radius: 12px; }
+.collapse-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:2px 10px; font-size:12px; cursor:pointer; color:var(--gray); }
+.collapse-btn:hover { border-color:var(--red); color:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Login Page -->
+<div id="page-login" class="page active">
+
+  <!-- Screen 1: 选角色 -->
+  <div id="login-screen-home" class="login-screen active">
+    <div class="login-wrap">
+      <div class="login-title">🎮 光遇</div>
+      <div class="login-sub" style="font-size:17px;font-weight:600;margin-bottom:6px;color:#333">生态达人活动管理</div>
+      <div class="login-sub">请选择您的身份</div>
+      <div class="role-cards" style="margin-top:36px">
+        <div class="role-card" onclick="goLoginScreen('ops')">
+          <div class="role-icon">🛠️</div>
+          <div class="role-name">运营</div>
+          <div class="role-desc">活动全流程管理<br>白名单·笔记·获奖</div>
+          <button style="margin-top:16px;font-size:12px;color:var(--red);font-weight:600;background:none;border:none;cursor:pointer;padding:0" onclick="event.stopPropagation();goLoginScreen('ops')">进入 →</button>
+        </div>
+        <div class="role-card" onclick="goLoginScreen('vendor')">
+          <div class="role-icon">🏢</div>
+          <div class="role-name">厂商</div>
+          <div class="role-desc">填写活动细则<br>评审笔记·公示获奖</div>
+          <button style="margin-top:16px;font-size:12px;color:var(--red);font-weight:600;background:none;border:none;cursor:pointer;padding:0" onclick="event.stopPropagation();goLoginScreen('vendor')">进入 →</button>
+        </div>
+        <div class="role-card" onclick="goLoginScreen('author')">
+          <div class="role-icon">✍️</div>
+          <div class="role-name">创作者</div>
+          <div class="role-desc">查看白名单·活动规则<br>提交异议</div>
+          <button style="margin-top:16px;font-size:12px;color:var(--red);font-weight:600;background:none;border:none;cursor:pointer;padding:0" onclick="event.stopPropagation();goLoginScreen('author')">进入 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 2: 运营登录 -->
+  <div id="login-screen-ops" class="login-screen">
+    <div class="login-wrap" style="max-width:400px">
+      <div style="font-size:40px;margin-bottom:12px">🛠️</div>
+      <div class="login-title" style="font-size:22px">运营管理台</div>
+      <div class="login-sub">请输入运营口令</div>
+      <div class="pwd-wrap">
+        <input type="password" class="pwd-input" id="ops-pwd-input" placeholder="输入口令" onkeydown="if(event.key==='Enter')doLoginRole('ops')">
+        <div id="ops-login-err" class="err-msg" style="display:none"></div>
+        <button class="btn-enter" onclick="doLoginRole('ops')">进入运营台 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: 厂商登录 -->
+  <div id="login-screen-vendor" class="login-screen">
+    <div class="login-wrap" style="max-width:400px">
+      <div style="font-size:40px;margin-bottom:12px">🏢</div>
+      <div class="login-title" style="font-size:22px">厂商台</div>
+      <div class="login-sub">请输入厂商专属口令</div>
+      <div class="pwd-wrap">
+        <input type="password" class="pwd-input" id="vendor-pwd-input" placeholder="输入厂商口令" onkeydown="if(event.key==='Enter')doLoginRole('vendor')">
+        <div id="vendor-login-err" class="err-msg" style="display:none"></div>
+        <button class="btn-enter" onclick="doLoginRole('vendor')">进入厂商台 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 4: 创作者 → 直接进入 page-author（含登录/注册UI） -->
+  <!-- goLoginScreen('author') 直接 showPage('author')，不需要额外屏 -->
+
+</div>
+
+<!-- OPS Page -->
+<div id="page-ops" class="page">
+  <nav class="nav">
+    <div class="nav-logo"><div class="logo-icon">🎮</div>光遇 · 生态达人活动管理</div>
+    <div class="nav-right">
+      <span class="nav-tag" id="ops-ip-tag"></span>
+      <button class="btn-logout" onclick="logout()">退出</button>
+    </div>
+  </nav>
+  <div class="container main-content">
+    <div class="tabs">
+      <div class="tab active" onclick="opsTab('activities')">🏠 活动总控台</div>
+      <div class="tab" onclick="opsTab('whitelist')">📋 白名单管理</div>
+      <div class="tab" onclick="opsTab('notes')">📝 合规笔记</div>
+      <div class="tab" onclick="opsTab('winners')">🏆 获奖公示</div>
+      <div class="tab" onclick="opsTab('objections')">💬 异议处理</div>
+      
+      <div class="tab" onclick="opsTab('backup')">💾 数据备份</div>
+    </div>
+    
+    <div id="ops-tab-activities">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:600;color:#333">🎮 光遇 · 活动列表</div>
+        <button class="btn btn-primary" onclick="openCreateActivity()">＋ 新建活动</button>
+      </div>
+      <div id="ops-activity-list"></div>
+    </div>
+    <div id="ops-tab-whitelist" style="display:none">
+      <div id="ops-whitelist-content"></div>
+    </div>
+    <div id="ops-tab-notes" style="display:none">
+      <div id="ops-notes-content"></div>
+    </div>
+    <div id="ops-tab-objections" style="display:none">
+      <div id="ops-objections-content"></div>
+    </div>
+    <div id="ops-tab-winners" style="display:none"><div id="ops-winners-content"></div></div>
+    <div id="ops-tab-backup" style="display:none">
+      <div class="section">
+        <div class="section-title">数据备份与恢复</div>
+        <div class="alert alert-info">💡 建议定期导出备份，避免浏览器清缓存导致数据丢失</div>
+        <div class="btn-group" style="flex-wrap:wrap;gap:10px">
+          <button class="btn btn-primary" onclick="exportActivitiesCSV()">📋 导出活动 CSV</button>
+          <button class="btn btn-primary" onclick="exportWhitelistCSV()">👥 导出白名单 CSV</button>
+          <button class="btn btn-primary" onclick="exportWinnersCSV()">🏆 导出获奖名单 CSV</button>
+          <button class="btn btn-primary" onclick="exportObjectionsCSV()">💬 导出异议 CSV</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportData()">导出全量备份 JSON</button>
+          <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📤 导入备份</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:13px;color:var(--gray)">
+          当前数据：<span id="data-summary" style="color:#333;font-weight:600"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Vendor Page -->
+<div id="page-vendor" class="page">
+  <nav class="nav">
+    <div class="nav-logo"><div class="logo-icon">🎮</div>光遇 · 生态达人活动管理</div>
+    <div class="nav-right">
+      <span class="nav-tag" id="vendor-ip-tag"></span>
+    </div>
+  </nav>
+  <div class="container main-content">
+    <div class="tabs">
+      <div class="tab active" onclick="vendorTab('activities')">📋 活动信息</div>
+      <div class="tab" onclick="vendorTab('whitelist')">👥 白名单</div>
+      <div class="tab" onclick="vendorTab('notes')">📝 合规笔记</div>
+      <div class="tab" onclick="vendorTab('winners')">🏆 获奖公示</div>
+      <div class="tab" onclick="vendorTab('objections')" id="vendor-objection-tab">💬 异议处理</div>
+    </div>
+    <div id="vendor-tab-activities"><div id="vendor-activity-list"></div></div>
+    <div id="vendor-tab-whitelist" style="display:none"><div id="vendor-whitelist-content"></div></div>
+    <div id="vendor-tab-notes" style="display:none"><div id="vendor-notes-content"></div></div>
+    <div id="vendor-tab-winners" style="display:none"><div id="vendor-winners-content"></div></div>
+    <div id="vendor-tab-objections" style="display:none"><div id="vendor-objections-content"></div></div>
+  </div>
+</div>
+
+<!-- Author Page -->
+<div id="page-author" class="page">
+  <nav class="nav">
+    <div class="nav-logo"><div class="logo-icon">🌌</div>光遇 · 生态达人</div>
+    <div class="nav-right">
+      <span class="nav-tag" style="background:#e8f0fe;color:#5BA3FF">光遇</span>
+    </div>
+  </nav>
+  <div class="container main-content">
+    <div class="tabs" id="author-tabs">
+      <div class="tab active" onclick="authorTab('whitelist')">📋 白名单公示</div>
+      <div class="tab" onclick="authorTab('winners')">🏆 获奖公示</div>
+      <div class="tab" onclick="authorTab('objection')">💬 提交&amp;查看异议</div>
+    </div>
+
+    <!-- Tab: 白名单公示 -->
+    <div id="author-tab-whitelist" style="max-width:680px;margin:0 auto">
+      <div class="section" style="margin-bottom:16px">
+        <div class="section-title">白名单查询</div>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:12px">输入您的小红书号或作者ID，查询是否在本次活动白名单中</div>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="author-wl-query-input"
+            placeholder="小红书号 / 作者ID（如 120202687 或 5e15e6be0000...）"
+            onkeydown="if(event.key==='Enter')doAuthorWLQuery()">
+          <button class="btn btn-primary" onclick="doAuthorWLQuery()" style="white-space:nowrap">查询</button>
+        </div>
+        <div id="author-wl-query-result" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- Tab: 获奖公示 -->
+    <div id="author-tab-winners" style="display:none;max-width:680px;margin:0 auto">
+      <div class="section" style="margin-bottom:16px">
+        <div class="section-title">获奖查询</div>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:12px">输入您的小红书号或作者ID，查询获奖情况</div>
+        <div class="search-bar">
+          <input type="text" class="search-input" id="author-winner-query-input"
+            placeholder="小红书号 / 作者ID"
+            onkeydown="if(event.key==='Enter')doAuthorWinnerQuery()">
+          <button class="btn btn-primary" onclick="doAuthorWinnerQuery()" style="white-space:nowrap">查询</button>
+        </div>
+        <div id="author-winner-query-result" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- Tab: 提交&查看异议 -->
+    <div id="author-tab-objection" style="display:none;max-width:680px;margin:0 auto">
+      <!-- 查看异议回复版块 -->
+      <div id="author-obj-status-wrap"></div>
+      <!-- 提交异议表单版块 -->
+      <div id="author-objection-form-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Detail Modal (Ops) -->
+<div class="modal-mask" id="modal-activity-detail">
+  <div class="modal" style="max-width:800px;width:95%">
+    <button class="modal-close" onclick="closeModal('modal-activity-detail')">×</button>
+    <div class="modal-title" id="detail-modal-title">活动详情</div>
+    <div id="detail-modal-body"></div>
+  </div>
+</div>
+
+<!-- Create Activity Modal -->
+<div class="modal-mask" id="modal-create-activity">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-create-activity')">×</button>
+    <div class="modal-title">新建活动</div>
+    <div class="form-group">
+      <label>活动名称</label>
+      <input type="text" class="form-input" id="new-act-name" placeholder="">
+    </div>
+    <div class="form-group">
+      <label>游戏IP</label>
+      <select class="form-select" id="new-act-ip">
+        <option value="sky" selected>光遇</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-create-activity')">取消</button>
+      <button class="btn btn-primary" onclick="createActivity()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Whitelist Modal -->
+<div class="modal-mask" id="modal-upload-whitelist">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-upload-whitelist')">×</button>
+    <div class="modal-title">导入白名单</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px">
+      <div style="font-size:13px;color:var(--gray);line-height:1.6">表头需包含「<b>作者ID</b>」和「<b>作者小红书号</b>」</div>
+      <button class="btn btn-outline btn-sm" style="white-space:nowrap;flex-shrink:0" onclick="downloadWLTemplate()">⬇ 下载CSV模板</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">导入方式</label>
+      <div style="display:flex;gap:16px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:normal">
+          <input type="radio" name="wl-import-mode" value="merge" checked> 新增合并（保留已有条目，仅新增不重复的）
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:normal">
+          <input type="radio" name="wl-import-mode" value="replace"> 完全覆盖（清空原白名单后替换）
+        </label>
+      </div>
+    </div>
+    <div class="upload-area" onclick="document.getElementById('wl-file').click()">
+      <div class="upload-icon">📄</div>
+      <div style="font-weight:600;margin-bottom:4px">点击选择CSV文件</div>
+      <div class="upload-hint">支持 .csv / .tsv 格式，字段：作者id、小红书号</div>
+    </div>
+    <input type="file" id="wl-file" accept=".csv,.tsv,.txt" style="display:none" onchange="previewWhitelist(event)">
+    <div id="wl-preview" style="margin-top:16px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-upload-whitelist')">取消</button>
+      <button class="btn btn-primary" id="wl-confirm-btn" style="display:none" onclick="confirmWhitelist()">确认导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal-mask" id="modal-add-note">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-note')">×</button>
+    <div class="modal-title">添加合规笔记</div>
+    <div class="form-group">
+      <label>笔记ID</label>
+      <input type="text" class="form-input" id="note-id-input" placeholder="笔记ID">
+    </div>
+    <div class="form-group">
+      <label>作者ID</label>
+      <input type="text" class="form-input" id="note-author-input" placeholder="作者小红书ID">
+    </div>
+    <div class="form-group">
+      <label>笔记标题</label>
+      <input type="text" class="form-input" id="note-title-input" placeholder="笔记标题">
+    </div>
+    <div class="form-group">
+      <label>笔记链接（可选）</label>
+      <input type="text" class="form-input" id="note-url-input" placeholder="https://...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-note')">取消</button>
+      <button class="btn btn-primary" onclick="confirmAddNote()">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vendor: Edit Detail Modal -->
+<div class="modal-mask" id="modal-vendor-detail">
+  <div class="modal" style="max-width:700px;width:95%">
+    <button class="modal-close" onclick="closeModal('modal-vendor-detail')">×</button>
+    <div class="modal-title">编辑活动规则</div>
+    <div id="vendor-detail-form"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-vendor-detail')">取消</button>
+      <button class="btn btn-primary" onclick="saveVendorDetail()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Winners Modal (Vendor & Ops) -->
+<div class="modal-mask" id="modal-upload-winners">
+  <div class="modal" style="max-width:520px;width:95%">
+    <button class="modal-close" onclick="closeModal('modal-upload-winners')">×</button>
+    <div class="modal-title" id="upload-winners-title">提交获奖公示信息</div>
+    <div class="alert alert-info" id="upload-winners-hint" style="margin-bottom:16px">填写完成后提交给运营确认，运营确认后作者端可查看获奖公示。</div>
+    <div class="form-group">
+      <label>公示截止时间 <span style="color:var(--red)">*</span></label>
+      <input type="datetime-local" class="form-input" id="winners-deadline">
+    </div>
+    <div class="form-group">
+      <label>获奖人数 <span style="color:var(--red)">*</span></label>
+      <input type="number" class="form-input" id="winners-count" placeholder="请输入本次活动获奖总人数" min="0">
+    </div>
+    <div class="form-group">
+      <label>公示链接（在线文档）<span style="color:var(--red)">*</span></label>
+      <input type="text" class="form-input" id="winners-link" placeholder="https://...（飞书/腾讯文档均可）">
+    </div>
+    <div class="form-group">
+      <label>补充说明（选填）</label>
+      <textarea class="form-textarea" id="winners-note" placeholder="如奖励发放时间、兑换方式等..." style="min-height:72px"></textarea>
+    </div>
+    <div class="form-group">
+      <label>获奖名单（CSV文件，表头：作者ID、作者小红书号）<span style="color:var(--red)"> *必填</span></label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('winners-list-file').click()">📤 上传获奖名单</button>
+        <button class="btn btn-ghost btn-sm" onclick="downloadWinnersTemplate()">📥 下载CSV示例</button>
+        <span id="winners-list-status" style="font-size:12px;color:var(--gray)">未上传</span>
+      </div>
+      <input type="file" id="winners-list-file" accept=".csv,.tsv,.txt" style="display:none" onchange="parseWinnersListFile(this)">
+      <div id="winners-list-preview" style="margin-top:8px;font-size:12px;color:var(--gray)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-upload-winners')">取消</button>
+      <button class="btn btn-primary" id="upload-winners-btn" onclick="saveWinners()">提交给运营确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic Confirm Modal -->
+<div class="modal-mask" id="modal-confirm">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title" id="confirm-title">确认操作</div>
+    <div id="confirm-body" style="margin-bottom:20px;color:var(--gray);font-size:14px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">取消</button>
+      <button class="btn btn-primary" id="confirm-ok-btn">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+const STATE = {
+  role: null,   // 'ops' | 'vendor' | 'author'
+  ip: null,     // 'sky' | 'nss' | 'yy'
+  authorXhsId: null,
+  authorInfo: null,
+  currentActivity: null,  // activity id for modals
+  pendingWL: null,  // parsed whitelist before confirm
+  currentWLActivityId: null,
+  currentNoteActivityId: null,
+  currentVendorActivityId: null,
+  opsIPFilter: 'all',
+};
+
+const IP_NAMES = { sky:'光遇' };
+const IP_PASSWORDS = { sky:'gystdr2026' };
+const STATUS_LABELS = {
+  draft: '草稿',
+  vendor_detail_pending: '细则待确认',
+  whitelist_ready: '白名单已公示',
+  active: '活动进行中',
+  collecting: '收集合规笔记',
+  vendor_review: '厂商评审中',
+  winners_published: '获奖公示中',
+  completed: '已完成'
+};
+const TIMELINE_STEPS = [
+  { key: 'vendor_detail_submitted', label: '厂商提交细则' },
+  { key: 'detail_confirmed', label: '运营确认细则' },
+  { key: 'whitelist_published', label: '白名单公示' },
+  { key: 'activity_started', label: '活动开始' },
+  { key: 'notes_collected', label: '合规笔记提交' },
+  { key: 'vendor_reviewed', label: '厂商评审完成' },
+  { key: 'winners_announced', label: '获奖公示' },
+  { key: 'completed', label: '活动完成' }
+];
+
+// 当某步骤完成时，自动补全所有前置步骤（保证流程线不出现跳过）
+function ensureTimelinePrereqs(act, targetStepKey) {
+  if (!act.timeline) act.timeline = [];
+  const idx = TIMELINE_STEPS.findIndex(s => s.key === targetStepKey);
+  if (idx <= 0) return;
+  const t0 = new Date().toISOString();
+  for (let i = 0; i < idx; i++) {
+    const key = TIMELINE_STEPS[i].key;
+    if (!act.timeline.find(t => t.step === key)) {
+      act.timeline.push({ step: key, completedAt: t0 });
+    }
+  }
+}
+
+// ========== DATA ==========
+const API_BASE = '/api/db';
+const _syncDebounce = {};
+
+async function _remoteGet(key) {
+  try {
+    const r = await fetch(`${API_BASE}?key=${encodeURIComponent(key)}`);
+    const text = await r.text();
+    return text === 'null' ? null : JSON.parse(text);
+  } catch(e) { return null; }
+}
+async function _remoteSet(key, value) {
+  try {
+    await fetch(API_BASE, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ key, value: JSON.stringify(value) })
+    });
+  } catch(e) {}
+}
+function _debouncedSync(key, value, ms=800) {
+  // 保留签名兼容性，实际直接立即同步
+  clearTimeout(_syncDebounce[key]);
+  _syncDebounce[key] = setTimeout(() => _remoteSet(key, value), ms);
+}
+
+// 立即同步到 D1（写操作统一走这里）
+async function _pushNow(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+  try { await _remoteSet(key, value); } catch(e) {}
+}
+
+// Pull latest data from D1（直接用远端覆盖，远端是权威）
+async function syncFromRemote() {
+  const [remoteData, remoteUsers] = await Promise.all([
+    _remoteGet('ecology_data_sky_v1'),
+    _remoteGet('ecology_users_sky_v1')
+  ]);
+  // 活动数据：远端直接覆盖（运营是权威来源）
+  if (remoteData) localStorage.setItem('ecology_data_sky_v1', JSON.stringify(remoteData));
+  // 用户数据：合并本地+远端，不丢弃任何一方的用户。审批状态以reviewedAt更新的为准
+  if (remoteUsers) {
+    try {
+      const localRaw = localStorage.getItem('ecology_users_sky_v1');
+      const localUsers = localRaw ? (JSON.parse(localRaw).users || {}) : {};
+      const remote = remoteUsers.users || {};
+      const allKeys = new Set([...Object.keys(localUsers), ...Object.keys(remote)]);
+      const merged = {};
+      let hasLocalOnly = false;
+      allKeys.forEach(k => {
+        const l = localUsers[k], r = remote[k];
+        if (!r) { merged[k] = l; hasLocalOnly = true; return; } // 本地独有 → 保留并推送
+        if (!l) { merged[k] = r; return; }  // 远端独有 → 保留
+        // 两端都有： reviewedAt 更新的胜；相同则用远端
+        const lt = new Date(l.reviewedAt || l.createdAt || 0).getTime();
+        const rt = new Date(r.reviewedAt || r.createdAt || 0).getTime();
+        merged[k] = lt > rt ? l : r;
+        if (lt > rt) hasLocalOnly = true;
+      });
+      localStorage.setItem('ecology_users_sky_v1', JSON.stringify({ users: merged }));
+      // 本地有远端没有的数据，立即推送合并结果到D1
+      if (hasLocalOnly) _remoteSet('ecology_users_sky_v1', { users: merged });
+      // 同步更新 STATE.authorUser（运营可能修改了 authorId）
+      if (STATE.authorUser && merged[STATE.authorUser.username]) {
+        STATE.authorUser = merged[STATE.authorUser.username];
+      }
+    } catch(e) {
+      localStorage.setItem('ecology_users_sky_v1', JSON.stringify(remoteUsers));
+    }
+  }
+}
+
+function getData() {
+  try {
+    const raw = localStorage.getItem('ecology_data_sky_v1');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { activities: {} };
+}
+function saveData(data) {
+  localStorage.setItem('ecology_data_sky_v1', JSON.stringify(data));
+  _remoteSet('ecology_data_sky_v1', data); // 立即同步
+}
+function getActivities() { return getData().activities || {}; }
+function getActivity(id) { return getActivities()[id]; }
+function saveActivity(act) {
+  const data = getData();
+  act.updatedAt = new Date().toISOString();
+  data.activities[act.id] = act;
+  saveData(data);
+  // 实时更新运营端活动总控台列表（流程线）
+  if (typeof opsCurrentTab !== 'undefined' && opsCurrentTab === 'activities' && typeof renderOpsActivities === 'function') {
+    renderOpsActivities();
+    if (typeof updateDataSummary === 'function') updateDataSummary();
+  }
+}
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function now() { return new Date().toISOString(); }
+function fmtDate(iso) {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// ========== TOAST ==========
+function toast(msg, type='', duration=2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = (type==='error') ? '#f5222d' : '#333';
+  el.style.display = 'block';
+  setTimeout(() => el.style.display='none', duration);
+}
+
+// ========== MODAL ==========
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-mask').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('show'); });
+});
+
+function showConfirm(title, body, onOk) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').textContent = body;
+  const btn = document.getElementById('confirm-ok-btn');
+  btn.onclick = () => { closeModal('modal-confirm'); onOk(); };
+  openModal('modal-confirm');
+}
+
+// ========== LOGIN ==========
+let selectedRole = null, selectedIP = null;
+
+function goLoginScreen(screen) {
+  // Switch between login sub-screens
+  document.querySelectorAll('.login-screen').forEach(s => s.classList.remove('active'));
+  if (screen === 'author') {
+    // Author goes directly to page-author (has its own login/register UI)
+    STATE.role = 'author'; STATE.ip = 'sky';
+    enterPage('author');
+    return;
+  }
+  const el = document.getElementById('login-screen-' + screen);
+  if (el) {
+    el.classList.add('active');
+    // Focus password input
+    const pwd = el.querySelector('input[type=password]');
+    if (pwd) setTimeout(() => pwd.focus(), 100);
+  }
+}
+
+function doLoginRole(role) {
+  if (role === 'ops') {
+    const pwd = document.getElementById('ops-pwd-input').value.trim();
+    const errEl = document.getElementById('ops-login-err');
+    if (pwd !== 'gyxhs2026') { errEl.textContent = '口令错误'; errEl.style.display='block'; return; }
+    errEl.style.display = 'none';
+    STATE.role = 'ops'; STATE.ip = null;
+    enterPage('ops');
+  } else if (role === 'vendor') {
+    const pwd = document.getElementById('vendor-pwd-input').value.trim();
+    const errEl = document.getElementById('vendor-login-err');
+    const matchedIP = Object.entries(IP_PASSWORDS).find(([,v]) => v === pwd)?.[0];
+    if (!matchedIP) { errEl.textContent = '口令错误'; errEl.style.display='block'; return; }
+    errEl.style.display = 'none';
+    STATE.role = 'vendor'; STATE.ip = matchedIP;
+    enterPage('vendor');
+  }
+}
+
+// Legacy aliases (kept for safety)
+function selectRole(role) { goLoginScreen(role); }
+function selectIP(ip) { selectedIP = ip; }
+function doLogin() {}
+
+function enterPage(role) {
+  // Save session so page refresh works
+  sessionStorage.setItem('ecology_session_sky', JSON.stringify({
+    role, ip: STATE.ip,
+    authorUser: STATE.authorUser ? STATE.authorUser.username : null
+  }));
+  // 直接显示页面，不依赖 hashchange（避免竞争条件）
+  showPage(role);
+  // 同步更新 hash，不触发弹窗（使用 history.replaceState 避免 hashchange 事件）
+  try { history.replaceState(null, '', '#' + role); } catch(e) {}
+}
+
+function showPage(role) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+role).classList.add('active');
+  if (role === 'ops') {
+    document.getElementById('ops-ip-tag').textContent = '运营';
+    renderOpsActivities();
+    updateDataSummary();
+  } else if (role === 'vendor') {
+    document.getElementById('vendor-ip-tag').textContent = IP_NAMES[STATE.ip];
+    renderVendorActivities();
+  } else if (role === 'author') {
+    const _ait = document.getElementById('author-ip-tag'); if (_ait) _ait.textContent = STATE.ip ? IP_NAMES[STATE.ip] : '创作者';
+    // 初始化作者端 Tab
+    authorTab('whitelist');
+  } else {
+    document.getElementById('page-login').classList.add('active');
+  }
+  // 每次进入页面都从 D1 拉最新数据并重渲染
+  syncFromRemote().then(() => {
+    if (role === 'ops') { renderOpsActivities(); updateDataSummary(); if(STATE.opsTab==='creators') renderOpsCreators(); }
+    else if (role === 'vendor') renderVendorActivities();
+    else if (role === 'author') { /* author tab initializes on showPage */ }
+  }).catch(()=>{});
+}
+
+window.addEventListener('hashchange', function() {
+  const hash = window.location.hash.replace('#','');
+  const valid = ['ops','vendor','author'];
+  if (valid.includes(hash)) {
+    // Try restore session
+    try {
+      const s = JSON.parse(sessionStorage.getItem('ecology_session_sky')||'{}');
+      if (s.role === hash) {
+        STATE.role = s.role;
+        STATE.ip = s.ip;
+        if (s.authorUser) {
+          const u = getUser(s.authorUser);
+          if (u) {
+            STATE.authorUser = u;
+            if (!STATE.ip && u.games && u.games.length) STATE.ip = u.games[0];
+          }
+        }
+        showPage(hash);
+        return;
+      }
+    } catch(e) {}
+    // No valid session for this hash → show that role's login screen directly
+    if (hash === 'author') {
+      showPage('author');
+    } else {
+      showPage('login');
+      goLoginScreen(hash);
+    }
+    return;
+  } else if (hash === 'login') {
+    // Already on login page, don't do anything disruptive
+    return;
+  } else {
+    showPage('login');
+  }
+});
+
+function logout() {
+  STATE.role = null; STATE.ip = null;
+  STATE.authorUser = null; STATE.pendingScreenshot = null;
+  selectedRole = null; selectedIP = null;
+  sessionStorage.removeItem('ecology_session_sky');
+  // Reset login screens
+  document.querySelectorAll('.login-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('login-screen-home').classList.add('active');
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  const opsPwd = document.getElementById('ops-pwd-input');
+  const vendorPwd = document.getElementById('vendor-pwd-input');
+  if (opsPwd) opsPwd.value = '';
+  if (vendorPwd) vendorPwd.value = '';
+  document.getElementById('ops-login-err').style.display = 'none';
+  document.getElementById('vendor-login-err').style.display = 'none';
+  // Reset author page
+  document.getElementById('author-auth-wrap').style.display = 'block';
+  document.getElementById('author-main').style.display = 'none';
+  const _ann = document.getElementById('author-nav-name'); if (_ann) _ann.style.display = 'none';
+  document.getElementById('al-username').value = '';
+  window.location.hash = 'login';
+  document.getElementById('al-password').value = '';
+  document.getElementById('al-err').style.display = 'none';
+  showAuthorLogin();
+  // Remove IP switcher if exists
+  const sw = document.getElementById('author-ip-switcher');
+  if (sw) sw.remove();
+}
+
+// ========== IP TAG HTML ==========
+function ipTag(ip) {
+  return `<span class="activity-ip-tag ip-${ip}">${IP_NAMES[ip]}</span>`;
+}
+function statusBadge(status) {
+  return `<span class="status-badge s-${status}">${STATUS_LABELS[status]||status}</span>`;
+}
+// Returns statusBadge only if whitelist has data, otherwise shows gray "白名单未公示"
+function statusBadgeWL(status, wl) {
+  return (wl&&wl.length>0) ? statusBadge(status) : '<span class="status-badge" style="background:#f5f5f5;color:#999">白名单未公示</span>';
+}
+
+// ========== OPS ==========
+let opsCurrentTab = 'activities';
+function opsTab(tab) {
+  opsCurrentTab = tab;
+  document.querySelectorAll('#page-ops .tab').forEach((t,i) => {
+    t.classList.toggle('active', ['activities','whitelist','notes','winners','objections','backup'][i] === tab);
+  });
+  ['activities','whitelist','notes','winners','objections','backup'].forEach(t => {
+    const el = document.getElementById('ops-tab-'+t);
+    if (el) el.style.display = t===tab ? 'block' : 'none';
+  });
+  if (tab === 'activities') { renderOpsActivities(); updateDataSummary(); }
+  if (tab === 'whitelist') renderOpsWhitelist();
+  if (tab === 'notes') renderOpsNotes();
+  if (tab === 'winners') renderOpsWinners();
+  if (tab === 'objections') {
+    renderOpsObjections();
+    // 切换到异议处理 Tab 时从 D1 拉最新数据并重渲染
+    syncFromRemote().then(() => renderOpsObjections()).catch(()=>{});
+  }
+  // creators tab removed
+  if (tab === 'backup') updateDataSummary();
+}
+
+function filterIP(ip, el) {
+  STATE.opsIPFilter = ip;
+  document.querySelectorAll('.ip-filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderOpsActivities();
+}
+
+function renderOpsActivities() {
+  const activities = getActivities();
+  const list = Object.values(activities).filter(a => STATE.opsIPFilter === 'all' || a.ip === STATE.opsIPFilter);
+  list.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const el = document.getElementById('ops-activity-list');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div>暂无活动，点击「新建活动」开始</div></div>`;
+    return;
+  }
+  el.innerHTML = list.map(a => `
+    <div class="activity-card" onclick="openActivityDetail('${a.id}')">
+      <div class="activity-card-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${ipTag(a.ip)}
+          <span class="activity-name">${a.name}</span>
+          ${a.status === 'vendor_detail_pending' ? '<span class="pending-dot"></span><span style="font-size:12px;color:#d46b08;font-weight:600">细则待确认</span>' : ''}
+          ${(a.winnersPublish && a.winnersPublish.submittedAt && !a.winnersPublish.approvedAt) ? '<span class="pending-dot"></span><span style="font-size:12px;color:#eb2f96;font-weight:600">获奖待确认</span>' : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          ${statusBadge(a.status)}
+          <button class="btn btn-sm" style="background:#fff1f0;color:#f5222d;border:1px solid #ffa39e;padding:4px 10px;font-size:12px" onclick="deleteActivity('${a.id}')">🗑 删除</button>
+        </div>
+      </div>
+      <div class="activity-meta">
+        <span>📅 创建于 ${fmtDate(a.createdAt)}</span>
+        <span>👥 白名单 ${(a.whitelist||[]).length} 人</span>
+        <span>📝 笔记 ${a.notesCount||0} 篇</span>
+        <span>🏆 获奖 ${(a.winnersPublish&&(a.winnersPublish.winnersCount||(a.winnersPublish.list&&a.winnersPublish.list.length)))||0} 人</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f5f5f5">
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();opsTab('whitelist')">📋 白名单管理</button>
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();opsTab('notes')">📝 合规笔记</button>
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();opsTab('winners')">🏆 获奖公示</button>
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();opsTab('objections')">💬 异议处理</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteActivity(actId) {
+  const act = getActivity(actId);
+  if (!act) return;
+  if (!confirm(`确认删除活动「${act.name}」？\n此操作不可撤销，活动数据（白名单、笔记、获奖名单）将全部删除。`)) return;
+  const data = getData();
+  delete data.activities[actId];
+  saveData(data);
+  renderOpsActivities();
+  toast('✅ 活动已删除');
+}
+
+function openCreateActivity() { openModal('modal-create-activity'); }
+
+function createActivity() {
+  const name = document.getElementById('new-act-name').value.trim();
+  const ip = document.getElementById('new-act-ip').value;
+  if (!name) { toast('请输入活动名称'); return; }
+  const act = {
+    id: genId(), ip, name, status: 'draft',
+    detail: { startTime:'', endTime:'', publishRules:'', contentDirection:'', rewards:'', tips:'', subActivities:[] },
+    whitelist: [], whitelistObjections: [], notes: [], winners: [], winnerObjections: [],
+    createdAt: now(), updatedAt: now(),
+    timeline: []
+  };
+  saveActivity(act);
+  closeModal('modal-create-activity');
+  document.getElementById('new-act-name').value = '';
+  renderOpsActivities();
+  toast('活动已创建');
+}
+
+// ---- Activity Detail ----
+function openActivityDetail(id) {
+  STATE.currentActivity = id;
+  const act = getActivity(id);
+  document.getElementById('detail-modal-title').innerHTML = act.name + ' ' + statusBadge(act.status);
+  renderDetailBody(act);
+  openModal('modal-activity-detail');
+}
+
+function renderDetailBody(act) {
+  // Auto-repair missing timeline steps based on actual data state
+  if (!act.timeline) act.timeline = [];
+  let repaired = false;
+  function ensureStep(key) {
+    if (!act.timeline.find(t => t.step === key)) {
+      act.timeline.push({ step: key, completedAt: now() });
+      repaired = true;
+    }
+  }
+  // 前置补全规则：完成后面步骤时，前面的必须也标为已完成
+  const hasWLPublished = !!(act.timeline||[]).find(t => t.step === 'whitelist_published');
+  const hasNotesDone   = !!(act.timeline||[]).find(t => t.step === 'notes_collected') || act.notesConfirmed;
+  const hasWinners     = !!(act.winnersPublish && act.winnersPublish.approvedAt);
+
+  // 白名单已公布 → 厂商已提交细则 + 运营已确认细则 必须同时完成
+  if (hasWLPublished) {
+    ensureStep('vendor_detail_submitted');
+    ensureStep('detail_confirmed');
+  }
+  // 白名单公示的条件自动补入
+  if ((act.wlClosed || (act.whitelist && act.whitelist.length > 0)) &&
+      !act.timeline.find(t => t.step === 'whitelist_published')) {
+    ensureStep('whitelist_published');
+  }
+  // 合规笔记已确认 → notes_collected、activity_started 前置补全
+  if (hasNotesDone) {
+    ensureStep('vendor_detail_submitted');
+    ensureStep('detail_confirmed');
+    ensureStep('whitelist_published');
+    ensureStep('activity_started');
+    ensureStep('notes_collected');
+  }
+  // 获奖公示已发布 → 前面所有步骤必须完成
+  if (hasWinners) {
+    ensureStep('vendor_detail_submitted');
+    ensureStep('detail_confirmed');
+    ensureStep('whitelist_published');
+    ensureStep('activity_started');
+    ensureStep('notes_collected');
+    ensureStep('vendor_reviewed');
+    ensureStep('winners_announced');
+  }
+  if (repaired) { syncActivityStatus(act); saveActivity(act); }
+
+  const completedSteps = (act.timeline||[]).map(t => t.step);
+  const currentStepIdx = TIMELINE_STEPS.findIndex(s => !completedSteps.includes(s.key));
+
+  const tlHtml = `<div class="tl-list">${TIMELINE_STEPS.map((step, i) => {
+    const done = completedSteps.includes(step.key);
+    const current = !done && i === currentStepIdx;
+    const tl = (act.timeline||[]).find(t => t.step === step.key);
+    return `<div class="tl-step ${done?'done':''}${current?' current':''}">
+      <div class="tl-dot">${done?'✓':i+1}</div>
+      <div style="padding-top:6px">
+        <div class="tl-label" style="${current?'color:var(--red);font-weight:700':done?'color:#333':'color:#aaa'}">${step.label}</div>
+        ${tl ? `<div class="tl-time" style="font-size:11px;color:#aaa;margin-top:2px">${fmtDate(tl.completedAt)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+
+  const detail = act.detail || {};
+  const subActHtml = (detail.subActivities||[]).map((s,i) => `
+    <div style="background:#fafafa;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px">
+      <div style="font-weight:600;margin-bottom:4px">${s.name || '子活动'+(i+1)}</div>
+      <div style="color:var(--gray)">${s.startTime||''} ~ ${s.endTime||''}</div>
+      <div>${s.rules||''}</div>
+      <div style="color:var(--red)">${s.rewards||''}</div>
+    </div>
+  `).join('');
+
+  // Next action — find the first truly pending step (skip steps that may have been bypassed)
+  let actionBtn = '';
+  const pendingStep = TIMELINE_STEPS.find(s => !completedSteps.includes(s.key));
+  if (!pendingStep) {
+    actionBtn = `<span style="color:#389e0d;font-size:13px">✅ 活动已全部完成</span>`;
+  } else {
+    const pk = pendingStep.key;
+    if (pk === 'vendor_detail_submitted') {
+      actionBtn = `<span style="color:#aaa;font-size:13px">⏳ 等待厂商提交活动细则</span>`;
+    } else if (pk === 'detail_confirmed') {
+      actionBtn = `<button class="btn btn-primary" onclick="opsConfirmDetail('${act.id}')">✅ 确认已查看细则</button>`;
+    } else if (pk === 'whitelist_published') {
+      actionBtn = `<span style="font-size:13px;color:#d46b08">⚠️ 白名单未公示 → </span><a style="color:var(--red);font-size:13px;font-weight:600;cursor:pointer" onclick="closeModal('modal-activity-detail');opsTab('whitelist')">白名单管理 ↗</a>`;
+    } else if (pk === 'activity_started') {
+      actionBtn = `<button class="btn btn-primary" onclick="advanceStep('activity_started')">🚀 标记活动开始</button>`;
+    } else if (pk === 'notes_collected') {
+      actionBtn = `<span style="font-size:13px;color:#d46b08">⚠️ 合规笔记未确认 → </span><a style="color:var(--red);font-size:13px;font-weight:600;cursor:pointer" onclick="closeModal('modal-activity-detail');opsTab('notes')">合规笔记 ↗</a>`;
+    } else if (pk === 'vendor_reviewed') {
+      actionBtn = `<button class="btn btn-ghost" onclick="advanceStep('vendor_reviewed')">确认厂商评审已完成</button>`;
+    } else if (pk === 'winners_announced') {
+      const wp = act.winnersPublish || {};
+      if (!wp.submittedAt) {
+        actionBtn = `<span style="font-size:13px;color:#aaa">⏳ 等待厂商提交获奖公示信息</span>`;
+      } else if (!wp.approvedAt) {
+        actionBtn = `<span style="font-size:13px;color:#d46b08">⚠️ 获奖公示待确认 → </span><a style="color:var(--red);font-size:13px;font-weight:600;cursor:pointer" onclick="closeModal('modal-activity-detail');opsTab('winners')">获奖公示 ↗</a>`;
+      } else {
+        actionBtn = `<button class="btn btn-primary" onclick="advanceStep('winners_announced')">📢 确认获奖公示已发布</button>`;
+      }
+    } else if (pk === 'completed') {
+      actionBtn = `<button class="btn btn-primary" onclick="advanceStep('completed')">🎉 标记活动完成</button>`;
+    }
+  }
+
+  document.getElementById('detail-modal-body').innerHTML = `
+    <div style="display:flex;gap:24px;margin-bottom:20px">
+      <div style="flex:0 0 220px">${tlHtml}</div>
+      <div style="flex:1;border-left:1px solid var(--border);padding-left:20px">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:12px;line-height:1.7">
+          此弹窗为活动总控台，运营可查看当前阶段信息并确认推进到下一步。<br>
+          若某步骤实际未完成，请勿点击确认推进。
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          ${actionBtn}
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="margin:16px 0">
+      <div style="font-weight:700;margin-bottom:8px">活动细则
+        ${detail && detail.mode ? `<span style="font-size:12px;font-weight:normal;color:var(--gray);margin-left:8px">${detail.mode==='upload'?'（厂商上传模式）':'（框架填写模式）'}</span>` : ''}
+      </div>
+      ${!detail || (!detail.startTime && !detail.uploadLink && !detail.uploadDoc) ? '<div style="color:#aaa;font-size:13px">（厂商尚未提交细则）</div>' : ''}
+      ${detail && detail.mode === 'upload' ? `
+        ${detail.startTime ? `<div style="font-size:13px;margin-bottom:6px"><b>活动时间：</b><span style="color:var(--red);font-weight:600">${(detail.startTime||'').replace('T',' ')} ~ ${(detail.endTime||'待定').replace('T',' ')}</span></div>` : ''}
+        ${detail.uploadLink ? `<div style="font-size:13px;margin-bottom:8px"><b>活动规则链接：</b><a href="${detail.uploadLink}" target="_blank" style="color:var(--red)">${detail.uploadLink}</a></div>` : ''}
+        ${detail.uploadDoc ? `<div style="font-size:13px;background:#fafafa;border-radius:8px;padding:12px;max-height:200px;overflow-y:auto;white-space:pre-wrap;margin-bottom:8px">${detail.uploadDoc}</div>` : ''}
+      ` : `
+        ${detail && detail.startTime ? `<div style="font-size:13px;color:var(--gray);margin-bottom:4px">⏰ ${(detail.startTime||"").replace("T"," ")} ~ ${(detail.endTime||"").replace("T"," ")}</div>` : ''}
+        ${detail && detail.publishRules ? `<div style="font-size:13px;margin-bottom:4px"><b>发布规则：</b>${detail.publishRules}</div>` : ''}
+        ${detail && detail.contentDirection ? `<div style="font-size:13px;margin-bottom:4px"><b>内容方向：</b>${detail.contentDirection}</div>` : ''}
+        ${detail && detail.rewards ? `<div style="font-size:13px;margin-bottom:4px"><b>活动奖励：</b><span style="color:var(--red)">${detail.rewards}</span></div>` : ''}
+        ${detail && detail.tips ? `<div style="font-size:13px;margin-bottom:4px"><b>活动提示：</b>${detail.tips}</div>` : ''}
+        ${subActHtml ? `<div style="margin-top:8px"><b style="font-size:13px">子活动：</b>${subActHtml}</div>` : ''}
+      `}
+    </div>
+    <div class="divider"></div>
+    <div style="margin:14px 0;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <span style="font-weight:700">白名单</span>
+        ${(act.whitelist||[]).length
+          ? `<span style="font-size:12px;color:#389e0d;margin-left:8px">✅ 已公示，<b style="color:var(--red)">${(act.whitelist||[]).length}</b> 人</span>`
+          : `<span style="font-size:12px;color:#aaa;margin-left:8px">⏳ 未上传</span>`}
+      </div>
+      <a style="font-size:12px;color:var(--red);cursor:pointer" onclick="closeModal('modal-activity-detail');opsTab('whitelist')">白名单管理 ↗</a>
+    </div>
+    <div class="divider"></div>
+    <div style="margin:14px 0;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <span style="font-weight:700">合规笔记</span>
+        ${act.notesConfirmed
+          ? `<span style="font-size:12px;color:#389e0d;margin-left:8px">✅ 已确认${act.notesCount ? '，<b style="color:var(--red)">'+act.notesCount+'</b> 篇' : ''}</span>`
+          : `<span style="font-size:12px;color:#aaa;margin-left:8px">⏳ 未确认</span>`}
+      </div>
+      <a style="font-size:12px;color:var(--red);cursor:pointer" onclick="closeModal('modal-activity-detail');opsTab('notes')">合规笔记 ↗</a>
+    </div>
+    <div class="divider"></div>
+    <div style="margin:14px 0;display:flex;justify-content:space-between;align-items:center">
+      ${(() => {
+        const wp = act.winnersPublish || {};
+        const wCount = wp.winnersCount || (wp.list && wp.list.length) || 0;
+        return `<div>
+          <span style="font-weight:700">获奖公示</span>
+          ${wp.approvedAt
+            ? `<span style="font-size:12px;color:#389e0d;margin-left:8px">✅ 已发布${wCount ? '，<b style="color:var(--red)">'+wCount+'</b> 人' : ''}</span>`
+            : wp.submittedAt
+              ? `<span style="font-size:12px;color:#fa8c16;margin-left:8px">⏳ 待确认发布</span>`
+              : `<span style="font-size:12px;color:#aaa;margin-left:8px">等待厂商提交</span>`}
+        </div>`;
+      })()}
+      <a style="font-size:12px;color:var(--red);cursor:pointer" onclick="closeModal('modal-activity-detail');opsTab('winners')">获奖公示 ↗</a>
+    </div>
+  `;
+}
+
+function renderWLTable(wl, actId, editable) {
+  if (!wl.length) return '<div style="color:#aaa;font-size:13px;padding:12px 0">暂无数据，可点击「导入表格」添加</div>';
+  const rows = wl.map((r,i) => `<tr>
+    <td>${i+1}</td>
+    <td>${r.authorId||'-'}</td>
+    <td>${r.xhsId||'-'}</td>
+    <td style="font-size:11px;color:var(--gray)">${r.source==='manual'?'手动':r.source==='objection'?'异议':'导入'}</td>
+    ${editable&&actId ? `<td><button class="btn btn-sm" style="color:#f5222d;background:none;border:none;cursor:pointer;padding:0" onclick="removeWLEntry('${actId}',${i})">✕</button></td>` : ''}
+  </tr>`).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>序号</th><th>作者ID</th><th>小红书号</th><th>来源</th>${editable&&actId?'<th></th>':''}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function removeWLEntry(actId, idx) {
+  const act = getActivity(actId);
+  if (!act || !act.whitelist || !act.whitelist[idx]) return;
+  const entry = act.whitelist[idx];
+  if (!confirm(`确认从白名单删除「${entry.authorId||entry.xhsId||'该条目'}」？`)) return;
+  act.whitelist.splice(idx, 1);
+  saveActivity(act);
+  renderOpsWhitelist();
+  toast('已删除');
+}
+
+function filterDetailWL(q) {
+  const act = getActivity(STATE.currentActivity);
+  const filtered = q ? (act.whitelist||[]).filter(r => r.authorId.includes(q) || r.xhsId.includes(q)) : act.whitelist||[];
+  document.getElementById('detail-wl-table').innerHTML = renderWLTable(filtered);
+}
+
+function renderNotesTable(notes) {
+  if (!notes.length) return '<div style="color:#aaa;font-size:13px">暂无笔记</div>';
+  return `<div class="table-wrap"><table><thead><tr><th>笔记ID</th><th>作者ID</th><th>标题</th><th>链接</th><th>操作</th></tr></thead><tbody>
+    ${notes.map(n => `<tr>
+      <td>${n.noteId}</td><td>${n.authorId}</td><td>${n.title}</td>
+      <td>${n.url ? `<a href="${n.url}" target="_blank" style="color:var(--red)">查看</a>` : '-'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteNote('${n.id}')">删除</button></td>
+    </tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+function deleteNote(nid) {
+  const act = getActivity(STATE.currentActivity);
+  act.notes = (act.notes||[]).filter(n => n.id !== nid);
+  saveActivity(act);
+  renderDetailBody(act);
+  toast('已删除');
+}
+
+function advanceStep(step) {
+  const act = getActivity(STATE.currentActivity);
+  // 前置校验
+  if (step === 'whitelist_published') {
+    if (!(act.whitelist && act.whitelist.length > 0)) {
+      toast('❌ 尚未上传白名单，请先到「📋 白名单管理」Tab 上传并设置公示截止时间', 'error');
+      return;
+    }
+    if (!act.wlDeadline && !act.wlClosed) {
+      toast('❌ 请先在「📋 白名单管理」Tab 设置白名单公示截止时间', 'error');
+      return;
+    }
+  }
+  if (step === 'notes_collected') {
+    if (!act.notesConfirmed) {
+      toast('❌ 尚未确认发送合规笔记，请先到「📝 合规笔记」Tab 确认', 'error');
+      return;
+    }
+  }
+  if (step === 'winners_announced') {
+    if (!act.winnersPublish || !act.winnersPublish.submittedAt) {
+      toast('❌ 厂商尚未提交获奖公示信息', 'error');
+      return;
+    }
+  }
+  if (!act.timeline) act.timeline = [];
+  // 自动补全前置步骤，保证流程线不跳过
+  ensureTimelinePrereqs(act, step);
+  if (!act.timeline.find(t => t.step === step)) {
+    act.timeline.push({ step, completedAt: now() });
+  }
+  syncActivityStatus(act);
+  saveActivity(act);
+  renderDetailBody(act);
+  renderOpsActivities();
+  toast('✅ 状态已更新');
+}
+
+function syncActivityStatus(act) {
+  const completedSteps = (act.timeline||[]).map(t => t.step);
+  if (completedSteps.includes('completed')) act.status = 'completed';
+  else if (completedSteps.includes('winners_announced')) act.status = 'winners_published';
+  else if (completedSteps.includes('vendor_reviewed')) act.status = 'vendor_review';
+  else if (completedSteps.includes('notes_collected')) act.status = 'collecting';
+  else if (completedSteps.includes('activity_started')) act.status = 'active';
+  else if (completedSteps.includes('whitelist_published')) act.status = 'whitelist_ready';
+  else if (completedSteps.includes('detail_confirmed')) act.status = 'whitelist_ready';
+  else if (completedSteps.includes('vendor_detail_submitted')) act.status = 'vendor_detail_pending';
+}
+
+function opsApproveWinners(actId) {
+  const act = getActivity(actId);
+  if (!act.winnersPublish || !act.winnersPublish.submittedAt) { toast('厂商尚未提交公示信息'); return; }
+  act.winnersPublish.approvedAt = now();
+  if (!act.timeline) act.timeline = [];
+  // Auto-pass vendor_reviewed if not yet done (vendor submitted winners = they reviewed)
+  if (!act.timeline.find(t => t.step === 'vendor_reviewed')) {
+    act.timeline.push({ step: 'vendor_reviewed', completedAt: now() });
+  }
+  if (!act.timeline.find(t => t.step === 'winners_announced')) {
+    act.timeline.push({ step: 'winners_announced', completedAt: now() });
+  }
+  syncActivityStatus(act);
+  saveActivity(act);
+  if (STATE.currentActivity) renderDetailBody(act);
+  renderOpsActivities();
+  toast('✅ 获奖公示已确认发布，作者端可见');
+}
+
+function opsConfirmDetail(actId) {
+  STATE.currentActivity = actId;
+  advanceStep('detail_confirmed');
+  toast('✅ 已确认查看活动细则，可开始上传白名单');
+}
+
+// ---- Whitelist Upload ----
+function openUploadWL() {
+  STATE.currentWLActivityId = STATE.currentActivity;
+  document.getElementById('wl-preview').innerHTML = '';
+  document.getElementById('wl-confirm-btn').style.display = 'none';
+  document.getElementById('wl-file').value = '';
+  STATE.pendingWL = null;
+  openModal('modal-upload-whitelist');
+}
+
+function previewWhitelist(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const text = ev.target.result;
+    const parsed = parseWhitelistCSV(text);
+    STATE.pendingWL = parsed;
+    const preview = document.getElementById('wl-preview');
+    if (!parsed.length) {
+      preview.innerHTML = '<div class="alert alert-warn">⚠️ 未解析到有效数据，请检查文件格式</div>';
+      return;
+    }
+    const missingXhs = parsed.filter(r => !r.xhsId);
+    const missingAuthor = parsed.filter(r => !r.authorId);
+    let warningHtml = '';
+    if (missingXhs.length) {
+      warningHtml += `<div class="alert alert-warn" style="margin-bottom:8px">
+        ⚠️ <b>${missingXhs.length} 条</b>记录缺少小红书号，建议补充后重新导入，否则创作者端将无法通过小红书号匹配白名单状态。
+        <span style="color:#ad6800;font-size:12px">缺失作者ID：${missingXhs.slice(0,5).map(r=>r.authorId||'(空)').join('、')}${missingXhs.length>5?`等${missingXhs.length}条`:''}</span>
+      </div>`;
+    }
+    if (missingAuthor.length) {
+      warningHtml += `<div style="font-size:12px;color:#aaa;margin-bottom:8px">ℹ️ ${missingAuthor.length} 条记录无作者ID（仅有小红书号）</div>`;
+    }
+    preview.innerHTML = `
+      <div class="alert alert-success">✅ 解析成功，共 ${parsed.length} 条（已过滤工作人员）</div>
+      ${warningHtml}
+      <div class="table-wrap" style="max-height:200px;overflow-y:auto">${renderWLTable(parsed.slice(0,20))}</div>
+      ${parsed.length>20 ? `<div style="text-align:center;font-size:12px;color:#aaa;margin-top:6px">仅显示前20条，共${parsed.length}条</div>` : ''}
+    `;
+    document.getElementById('wl-confirm-btn').style.display = 'block';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function downloadWLTemplate() {
+  const csv = '作者ID,作者小红书号\n,\n';
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = '白名单导入模板.csv';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function parseWhitelistCSV(text) {
+  // Support both comma and tab separated, handle BOM
+  text = text.replace(/^\uFEFF/, '');
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return [];
+  // Detect separator
+  const sep = lines[0].includes('\t') ? '\t' : ',';
+  const headers = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g, ''));
+  // Find column indices
+  const idxAuthorId = headers.findIndex(h => h === '用户群id' || h === '用户群ID' || h === '作者ID' || h === '作者id');
+  const idxXhsId = headers.findIndex(h => h.includes('小红书用') || h === '小红书id' || h === '小红书ID' || h === '作者小红书号');
+  const idxName = headers.findIndex(h => h === '昵称' || h === '名称' || h === '姓名');
+  const idxRemark = headers.findIndex(h => h === '备注');
+  if (idxAuthorId === -1 && idxXhsId === -1) return [];
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i], sep);
+    const remark = idxRemark >= 0 ? (cols[idxRemark]||'').trim() : '';
+    if (remark.includes('工作人员')) continue;
+    const authorId = idxAuthorId >= 0 ? (cols[idxAuthorId]||'').trim() : '';
+    const xhsId = idxXhsId >= 0 ? (cols[idxXhsId]||'').trim() : '';
+    if (!authorId && !xhsId) continue;
+    result.push({ authorId, xhsId, name: idxName >= 0 ? (cols[idxName]||'').trim() : '' });
+  }
+  return result;
+}
+
+function splitCSVLine(line, sep) {
+  if (sep === '\t') return line.split('\t').map(c => c.replace(/^"|"$/g,''));
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === sep && !inQ) { result.push(cur.trim()); cur = ''; }
+    else { cur += line[i]; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function confirmWhitelist() {
+  if (!STATE.pendingWL) return;
+  const act = getActivity(STATE.currentWLActivityId || STATE.currentActivity);
+  const mode = document.querySelector('input[name="wl-import-mode"]:checked')?.value || 'merge';
+  let added = 0;
+  if (mode === 'replace') {
+    act.whitelist = STATE.pendingWL;
+    added = STATE.pendingWL.length;
+  } else {
+    // merge: add entries not already in whitelist (by authorId or xhsId)
+    if (!act.whitelist) act.whitelist = [];
+    STATE.pendingWL.forEach(entry => {
+      const dup = act.whitelist.some(r =>
+        (entry.authorId && r.authorId === entry.authorId) ||
+        (entry.xhsId && r.xhsId === entry.xhsId)
+      );
+      if (!dup) { act.whitelist.push(entry); added++; }
+    });
+  }
+  // Mark whitelist_published in timeline（并自动补全前置步骤）
+  if (!act.timeline) act.timeline = [];
+  ensureTimelinePrereqs(act, 'whitelist_published');
+  if (!act.timeline.find(t => t.step === 'whitelist_published')) {
+    act.timeline.push({ step: 'whitelist_published', completedAt: now() });
+  }
+  syncActivityStatus(act);
+  saveActivity(act);
+  closeModal('modal-upload-whitelist');
+  if (STATE.currentActivity) renderDetailBody(act);
+  renderOpsWhitelist();
+  const missingXhs = STATE.pendingWL.filter(r => !r.xhsId).length;
+  const modeLabel = mode === 'replace' ? '覆盖导入' : '合并新增';
+  if (missingXhs > 0) {
+    toast(`✅ ${modeLabel}完成，新增 ${added} 人（⚠️ ${missingXhs} 条缺少小红书号）`, 5000);
+  } else {
+    toast(`✅ ${modeLabel}完成，新增 ${added} 人，当前共 ${act.whitelist.length} 人`);
+  }
+  STATE.pendingWL = null;
+}
+
+// ---- Add Note ----
+function openAddNote() {
+  STATE.currentNoteActivityId = STATE.currentActivity;
+  ['note-id-input','note-author-input','note-title-input','note-url-input'].forEach(id => document.getElementById(id).value='');
+  openModal('modal-add-note');
+}
+
+function confirmAddNote() {
+  const noteId = document.getElementById('note-id-input').value.trim();
+  const authorId = document.getElementById('note-author-input').value.trim();
+  const title = document.getElementById('note-title-input').value.trim();
+  const url = document.getElementById('note-url-input').value.trim();
+  if (!noteId || !authorId || !title) { toast('请填写笔记ID、作者ID和标题'); return; }
+  const act = getActivity(STATE.currentNoteActivityId);
+  if (!act.notes) act.notes = [];
+  act.notes.push({ id: genId(), noteId, authorId, title, url });
+  saveActivity(act);
+  closeModal('modal-add-note');
+  renderDetailBody(act);
+  toast('笔记已添加');
+}
+
+// ---- Ops Whitelist Tab ----
+function checkExpiredWLDeadlines() {
+  // Auto-advance timeline for activities whose wlDeadline has passed
+  let changed = false;
+  Object.values(getActivities()).forEach(act => {
+    if (act.status === 'draft') return;
+    const expired = act.wlDeadline && !act.wlClosed && Date.now() > new Date(act.wlDeadline).getTime();
+    if (!expired) return;
+    if (!act.timeline) act.timeline = [];
+    let dirty = false;
+    if (!act.timeline.find(t => t.step === 'whitelist_published')) {
+      ensureTimelinePrereqs(act, 'whitelist_published');
+      act.timeline.push({ step: 'whitelist_published', completedAt: act.wlDeadline });
+      dirty = true;
+    }
+    if (!act.timeline.find(t => t.step === 'activity_started')) {
+      act.timeline.push({ step: 'activity_started', completedAt: act.wlDeadline });
+      dirty = true;
+    }
+    if (dirty) { syncActivityStatus(act); saveActivity(act); changed = true; }
+  });
+  return changed;
+}
+
+function renderOpsWhitelist() {
+  checkExpiredWLDeadlines();
+  const activities = Object.values(getActivities()).filter(a => a.status !== 'draft').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const el = document.getElementById('ops-whitelist-content');
+  if (!activities.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>暂无活动</div></div>';
+    return;
+  }
+  el.innerHTML = activities.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).map((a,idx) => {
+    const wl = a.whitelist || [];
+    const deadline = a.wlDeadline || '';
+    const now_ = Date.now();
+    const deadlineTs = deadline ? new Date(deadline).getTime() : 0;
+    const isExpired = deadlineTs && now_ > deadlineTs;
+    const isManuallyClosed = a.wlClosed;
+    const objOpen = !isExpired && !isManuallyClosed;
+    let deadlineStatus = '';
+    if (isManuallyClosed) {
+      deadlineStatus = '<span style="color:#f5222d;font-size:12px;font-weight:600">⛔ 公示已手动结束</span>';
+    } else if (isExpired) {
+      deadlineStatus = '<span style="color:#f5222d;font-size:12px;font-weight:600">⌛ 公示已截止</span>';
+    } else if (deadline) {
+      deadlineStatus = `<span style="color:#389e0d;font-size:12px">✅ 公示截止：${deadline.replace('T',' ')}</span>`;
+    } else {
+      deadlineStatus = '<span style="color:#aaa;font-size:12px">（未设置公示截止日期）</span>';
+    }
+    const bodyId = 'opswlb-'+a.id;
+    const isFirst = idx===0;
+    return `
+    <div class="section" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-weight:600">${a.name}</span>
+          ${wl.length > 0 ? `<span style="font-size:12px;color:var(--red);font-weight:600">${wl.length} 人</span>` : `<span style="font-size:12px;color:#aaa">白名单未上传</span>`}
+          ${wl.length > 0 ? deadlineStatus : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <button class="btn btn-outline btn-sm" onclick="openUploadWLDirect('${a.id}')">📤 导入</button>
+        </div>
+      </div>
+      <div id="${bodyId}" style="padding:0 18px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div></div>
+        <div></div>
+      </div>
+      <!-- 公示截止日期设置 -->
+      <div style="background:#fafafa;border-radius:8px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:13px;color:#333;font-weight:600">公示截止：</span>
+        ${deadlineStatus}
+        <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+          <input type="datetime-local" id="wl-deadline-${a.id}" value="${deadline}" step="1"
+            style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;height:30px">
+          <button class="btn btn-primary btn-sm" onclick="saveWLDeadline('${a.id}')">设置</button>
+          ${objOpen && deadline ? `<button class="btn btn-sm" style="background:#fff1f0;color:#f5222d;border:1px solid #ffa39e" onclick="closeWLNow('${a.id}')">立即结束</button>` : ''}
+          ${(isExpired || isManuallyClosed) ? `<button class="btn btn-outline btn-sm" onclick="reopenWL('${a.id}')">重新开启</button>` : ''}
+        </div>
+      </div>
+      <!-- 白名单列表 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:13px;color:var(--gray)">共 ${wl.length} 人</span>
+        ${wl.length ? `<button class="btn btn-outline btn-sm" onclick="downloadOpsWL('${a.id}','${a.name}')">⬇ 下载白名单</button>` : ''}
+      </div>
+      <div class="search-bar"><input class="search-input" placeholder="搜索作者ID/小红书号" oninput="filterWLSection(this,'wl-collapse-${a.id}','${a.id}')"></div>
+      <div id="wl-collapse-${a.id}">
+        ${wl.length <= 5
+          ? renderWLTable(wl, a.id, true)
+          : `${renderWLTable(wl.slice(0,5), a.id, false)}
+             <div id="wl-full-${a.id}" style="display:none">${renderWLTable(wl, a.id, true)}</div>
+             <div style="text-align:center;margin-top:8px">
+               <button class="btn btn-ghost btn-sm" id="wl-toggle-${a.id}" onclick="toggleWLExpand('${a.id}')">▼ 点击展开全部 ${wl.length} 人</button>
+             </div>`
+        }
+      </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveWLDeadline(actId) {
+  const val = document.getElementById('wl-deadline-'+actId).value;
+  if (!val) { toast('请选择截止日期时间'); return; }
+  const act = getActivity(actId);
+  act.wlDeadline = val;
+  act.wlClosed = false;
+  saveActivity(act);
+  renderOpsWhitelist();
+  toast(`✅ 公示截止时间已设为 ${val.replace('T',' ')}`);
+}
+
+function closeWLNow(actId) {
+  if (!confirm('确认立即结束白名单公示？结束后作者将无法再提交异议。')) return;
+  const act = getActivity(actId);
+  act.wlClosed = true;
+  // Advance timeline to activity_started（并自动补全前置步骤）
+  if (!act.timeline) act.timeline = [];
+  if (!act.timeline.find(t => t.step === 'whitelist_published')) {
+    ensureTimelinePrereqs(act, 'whitelist_published');
+    act.timeline.push({ step: 'whitelist_published', completedAt: now() });
+  }
+  if (!act.timeline.find(t => t.step === 'activity_started')) {
+    act.timeline.push({ step: 'activity_started', completedAt: now() });
+  }
+  syncActivityStatus(act);
+  saveActivity(act);
+  renderOpsWhitelist();
+  toast('⛔ 白名单公示已结束，活动已标记为开始');
+}
+
+function reopenWL(actId) {
+  const act = getActivity(actId);
+  act.wlClosed = false;
+  act.wlDeadline = '';
+  const el = document.getElementById('wl-deadline-'+actId);
+  if (el) el.value = '';
+  saveActivity(act);
+  renderOpsWhitelist();
+  toast('✅ 白名单公示已重新开启，请重新设置截止时间');
+}
+
+function toggleWLExpand(actId) {
+  const full = document.getElementById('wl-full-'+actId);
+  const btn = document.getElementById('wl-toggle-'+actId);
+  if (!full) return;
+  const isHidden = full.style.display === 'none';
+  full.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? '▲ 收起' : `▼ 点击展开全部`;
+  if (isHidden) {
+    // hide the preview table
+    const collapse = document.getElementById('wl-collapse-'+actId);
+    const previewTable = collapse?.querySelector('div.table-wrap');
+    if (previewTable) previewTable.style.display = 'none';
+  } else {
+    const collapse = document.getElementById('wl-collapse-'+actId);
+    const previewTable = collapse?.querySelector('div.table-wrap');
+    if (previewTable) previewTable.style.display = '';
+  }
+}
+
+function openUploadWLDirect(actId) {
+  STATE.currentActivity = actId;
+  openUploadWL();
+}
+
+function openAddWLManual(actId) {
+  STATE.currentActivity = actId;
+  // Build a simple inline modal
+  const act = getActivity(actId);
+  const modalHtml = `
+    <div id="modal-wl-manual" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-wl-manual')">
+      <div class="modal" style="max-width:480px">
+        <div class="modal-title">手动录入白名单 — ${act.name}</div>
+        <div class="alert alert-info" style="font-size:12px">可只填作者ID或只填小红书号，至少填写一项</div>
+        <div class="form-row">
+          <div class="form-group"><label>作者ID</label><input type="text" class="form-input" id="mwl-authorid" placeholder="用户群id"></div>
+          <div class="form-group"><label>小红书号</label><input type="text" class="form-input" id="mwl-xhsid" placeholder="小红书号"></div>
+        </div>
+        <div class="form-group"><label>姓名（选填）</label><input type="text" class="form-input" id="mwl-name" placeholder="创作者姓名"></div>
+        <div id="mwl-err" class="err-msg" style="display:none;margin-bottom:8px"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-outline" onclick="closeModal('modal-wl-manual')">取消</button>
+          <button class="btn btn-primary" onclick="saveWLManual()">添加</button>
+        </div>
+      </div>
+    </div>
+  `;
+  // Remove existing if any
+  const existing = document.getElementById('modal-wl-manual');
+  if (existing) existing.remove();
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  document.getElementById('modal-wl-manual').classList.add('active');
+}
+
+function saveWLManual() {
+  const authorId = document.getElementById('mwl-authorid').value.trim();
+  const xhsId = document.getElementById('mwl-xhsid').value.trim();
+  const name = document.getElementById('mwl-name').value.trim();
+  const errEl = document.getElementById('mwl-err');
+  errEl.style.display = 'none';
+  if (!authorId && !xhsId) { errEl.textContent = '作者ID和小红书号至少填写一项'; errEl.style.display='block'; return; }
+  const act = getActivity(STATE.currentActivity);
+  if (!act.whitelist) act.whitelist = [];
+  // Check duplicate
+  const isDup = act.whitelist.some(r =>
+    (authorId && r.authorId === authorId) || (xhsId && r.xhsId === xhsId)
+  );
+  if (isDup) { errEl.textContent = '该作者已在白名单中'; errEl.style.display='block'; return; }
+  act.whitelist.push({ authorId, xhsId, name, source: 'manual', addedAt: now() });
+  saveActivity(act);
+  closeModal('modal-wl-manual');
+  renderOpsWhitelist();
+  toast('✅ 已添加到白名单');
+}
+
+function filterWLSection(input, tableId, actId) {
+  const q = input.value.trim();
+  const act = getActivity(actId);
+  const container = document.getElementById(tableId);
+  if (!container) return;
+  if (!q) {
+    // 清空搜索时恢复默认展示（5条）
+    const wl = act.whitelist || [];
+    container.innerHTML = wl.length <= 5
+      ? renderWLTable(wl, actId, true)
+      : renderWLTable(wl.slice(0,5), actId, false) +
+        `<div id="wl-full-${actId}" style="display:none">${renderWLTable(wl, actId, true)}</div>
+         <div style="text-align:center;margin-top:8px"><button class="btn btn-ghost btn-sm" id="wl-toggle-${actId}" onclick="toggleWLExpand('${actId}')">▼ 点击展开全部 ${wl.length} 人</button></div>`;
+    return;
+  }
+  const filtered = (act.whitelist||[]).filter(r =>
+    (r.authorId||'').toLowerCase().includes(q.toLowerCase()) ||
+    (r.xhsId||'').toLowerCase().includes(q.toLowerCase()) ||
+    (r.name||'').toLowerCase().includes(q.toLowerCase())
+  );
+  container.innerHTML = filtered.length
+    ? renderWLTable(filtered, actId, true)
+    : '<div style="text-align:center;padding:20px;color:#aaa;font-size:13px">未找到匹配结果</div>';
+}
+
+// ---- Ops Objections Tab ----
+function renderOpsNotes() {
+  const el = document.getElementById('ops-notes-content');
+  const activities = Object.values(getActivities()).filter(a => a.status !== 'draft').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  if (!activities.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div>暂无活动</div></div>'; return; }
+  el.innerHTML = activities.map((a,idx) => {
+    const confirmed = !!a.notesConfirmed;
+    const info = a.notesConfirmedInfo || {};
+    const bodyId = 'opsnb-'+a.id;
+    const isFirst = idx === 0;
+    return `
+    <div class="section" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-weight:600">${a.name}</span>
+          ${statusBadgeWL(a.status, a.whitelist)}
+          ${confirmed ? '<span style="font-size:12px;color:#389e0d">✅ 已确认</span>' : '<span style="font-size:12px;color:#fa8c16">⏳ 待确认</span>'}
+          ${a.notesCount ? `<span style="font-size:12px;color:#333">共 <b style="color:var(--red)">${a.notesCount}</b> 条</span>` : ''}
+        </div>
+      </div>
+      <div id="${bodyId}" style="padding:0 18px 14px;">
+        ${confirmed
+          ? `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <span style="color:#389e0d;font-size:13px">✅ 已确认发送 · ${fmtDate(info.confirmedAt)}${info.note ? ' · '+info.note : ''}${a.notesCount ? ' · 共'+a.notesCount+'条' : ''}</span>
+              <button class="btn btn-ghost btn-sm" onclick="cancelNotesConfirm('${a.id}')">撤销</button>
+             </div>`
+          : `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <input type="number" id="notes-count-${a.id}" class="form-input" style="width:120px;font-size:13px" placeholder="笔记条数" value="${a.notesCount||''}">
+              <input type="text" id="notes-remark-${a.id}" class="form-input" style="width:200px;font-size:13px" placeholder="备注（选填）">
+              <button class="btn btn-primary btn-sm" onclick="confirmNotesDelivery('${a.id}')">✅ 确认已发给厂商</button>
+             </div>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function confirmNotesDelivery(actId) {
+  const act = getActivity(actId);
+  const note = document.getElementById('notes-remark-'+actId)?.value || '';
+  const count = document.getElementById('notes-count-'+actId)?.value || '';
+  act.notesConfirmed = true;
+  act.notesConfirmedInfo = { confirmedAt: now(), note };
+  if (count) act.notesCount = parseInt(count, 10) || count;
+  // Auto-advance timeline
+  if (!act.timeline) act.timeline = [];
+  if (!act.timeline.find(t => t.step === 'notes_collected')) {
+    act.timeline.push({ step: 'notes_collected', completedAt: now() });
+  }
+  syncActivityStatus(act);
+  saveActivity(act);
+  renderOpsNotes();
+  renderOpsActivities();
+  toast('✅ 已确认，合规笔记步骤已推进');
+}
+
+function cancelNotesConfirm(actId) {
+  if (!confirm('确认撤销？厂商侧将不再显示已发送状态。')) return;
+  const act = getActivity(actId);
+  act.notesConfirmed = false;
+  act.notesConfirmedInfo = null;
+  saveActivity(act);
+  renderOpsNotes();
+  toast('已撤销');
+}
+
+function renderOpsObjections() {
+  const activities = Object.values(getActivities()).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const el = document.getElementById('ops-objections-content');
+  const refreshBtn = '<div style="text-align:right;margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="syncFromRemote().then(()=>renderOpsObjections())" style="font-size:12px">🔄 刷新异议</button></div>';
+  if (!activities.length) { el.innerHTML = refreshBtn + '<div class="empty"><div class="empty-icon">💬</div><div>暂无活动</div></div>'; return; }
+  const opsObjHtml = activities.map((a,idx) => {
+    const wlObjs = (a.whitelistObjections||[]).map(o=>({...o,actName:a.name,actId:a.id,type:'whitelist',ip:a.ip}));
+    const wnObjs = (a.winnerObjections||[]).map(o=>({...o,actName:a.name,actId:a.id,type:'winner',ip:a.ip}));
+    const all = [...wlObjs,...wnObjs];
+    const pending = all.filter(o=>o.status==='pending');
+    const bodyId = 'opsobj-'+a.id;
+    const isFirst = idx===0;
+    return `
+    <div class="section" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-weight:600">${a.name}</span>
+          ${statusBadgeWL(a.status, a.whitelist)}
+          ${pending.length ? `<span style="font-size:12px;color:var(--red);font-weight:600">● ${pending.length} 条待处理</span>` : '<span style="font-size:12px;color:#aaa">无待处理</span>'}
+        </div>
+      </div>
+      <div id="${bodyId}" style="padding:0 18px 14px;">
+        ${!all.length ? '<div style="color:#aaa;font-size:13px">暂无异议记录</div>' : renderObjectionTable(all, true)}
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML = refreshBtn + opsObjHtml;
+}
+
+function renderObjectionTable(list, showActions) {
+  const statusLabel = {pending:'待处理', approved:'已通过', rejected:'已拒绝', vendor_pending:'转给厂商'};
+  return list.map(o => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <span style="font-size:12px;font-weight:600;background:#f0f0f0;padding:2px 8px;border-radius:4px">${o.type==='whitelist'?'白名单异议':'获奖异议'}</span>
+          <span style="font-size:12px;color:var(--gray);margin-left:8px">${o.actName}</span>
+        </div>
+        <span class="tag tag-${o.status}">${statusLabel[o.status]||o.status}</span>
+      </div>
+      <div style="font-size:13px;line-height:1.9">
+        <div><b>作者ID：</b>${o.authorId||'-'} &nbsp;<b>小红书号：</b>${o.xhsId||'-'}</div>
+        <div><b>异议原因：</b>${o.reason||'-'}</div>
+        ${o.status==='rejected' ? `<div style="color:#f5222d"><b>拒绝理由：</b>${o.rejectReason||'-'}</div>` : ''}
+        ${o.status==='approved' ? `<div style="color:#389e0d">✅ 已通过${o.handledAt?' · '+fmtDate(o.handledAt):''}</div>` : ''}
+        ${o.status==='vendor_pending' ? `<div style="color:#fa8c16"><b>状态：</b>已转给厂商处理${o.vendorReply?'，厂商回复：'+o.vendorReply:''}</div>` : ''}
+      </div>
+      ${(showActions && o.status === 'pending') ? `
+        <div style="margin-top:10px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="confirmOpsObjAction('${o.actId}','${o.id}','${o.type}','approve')">✅ 通过</button>
+            <button class="btn btn-sm" style="background:#fff7e6;color:#d46b08;border:1px solid #ffd591" onclick="openOpsReplyObjection('${o.actId}','${o.id}','${o.type}','vendor')">🔀 转给厂商处理</button>
+            <button class="btn btn-sm" style="background:#fff1f0;color:#f5222d;border:1px solid #ffa39e" onclick="openOpsReplyObjection('${o.actId}','${o.id}','${o.type}','reject')">拒绝</button>
+          </div>
+        </div>
+      ` : (o.handledAt ? `<div style="font-size:12px;color:var(--gray);margin-top:6px">处理时间：${fmtDate(o.handledAt)}</div>` : '')}
+    </div>
+  `).join('');
+}
+
+// 白名单异议「通过」—— 二次确认，无需填回复
+function confirmOpsObjAction(actId, objId, type, action) {
+  const act = getActivity(actId);
+  const list = type === 'whitelist' ? act.whitelistObjections : act.winnerObjections;
+  const obj = list.find(o => o.id === objId);
+  if (!obj) return;
+  // 通过：弹二次确认，不需要回复文本（作者端可自查结果）
+  const div = document.createElement('div');
+  div.id = 'ops-reply-modal';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center';
+  div.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:24px;width:400px;max-width:95%">
+      <div style="font-weight:700;font-size:16px;margin-bottom:12px">确认通过异议</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:12px">作者ID：${obj.authorId||'-'} &nbsp;小红书号：${obj.xhsId||'-'}</div>
+      <div class="form-group">
+        <label style="font-size:13px">给作者的留言（作者可查看，不显示处理人身份）</label>
+        <textarea id="ops-approve-reply-text" class="form-textarea" style="min-height:72px;margin-top:6px" placeholder="可选，如：已核实，将为您安排~"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="document.getElementById('ops-reply-modal').remove()">取消</button>
+        <button class="btn btn-primary" onclick="submitOpsObjReply('${actId}','${objId}','${type}','approve')">确认通过</button>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+}
+
+// Modal for ops reply（转厂商/拒绝 仍需填写原因）
+function openOpsReplyObjection(actId, objId, type, action) {
+  const act = getActivity(actId);
+  const list = type === 'whitelist' ? act.whitelistObjections : act.winnerObjections;
+  const obj = list.find(o => o.id === objId);
+  if (!obj) return;
+  const labelMap = { vendor:'转给厂商处理', reject:'拒绝异议' };
+  const placeholder = action === 'vendor' ? '转给厂商的备注（可选）' : '请填写拒绝理由（将记录存档）';
+
+  const div = document.createElement('div');
+  div.id = 'ops-reply-modal';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center';
+  div.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:24px;width:420px;max-width:95%">
+      <div style="font-weight:700;font-size:16px;margin-bottom:12px">${labelMap[action]||action}</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:12px">作者ID：${obj.authorId||'-'} · 小红书号：${obj.xhsId||'-'}</div>
+      <textarea id="ops-reply-text" class="form-textarea" style="min-height:80px" placeholder="${placeholder}"></textarea>
+      <div style="display:flex;gap:10px;margin-top:12px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="document.getElementById('ops-reply-modal').remove()">取消</button>
+        <button class="btn btn-primary" onclick="submitOpsObjReply('${actId}','${objId}','${type}','${action}')">确认</button>
+      </div>
+    </div>`;
+  document.body.appendChild(div);
+}
+
+function submitOpsObjReply(actId, objId, type, action) {
+  // 通过时读取可选留言框；拒绝/转厂商时读取必填框
+  const reply = action === 'approve'
+    ? (document.getElementById('ops-approve-reply-text')?.value||'').trim()
+    : (document.getElementById('ops-reply-text')?.value||'').trim();
+  if (action === 'reject' && !reply) { toast('请填写拒绝理由'); return; }
+  const act = getActivity(actId);
+  const list = type === 'whitelist' ? act.whitelistObjections : act.winnerObjections;
+  const obj = list.find(o => o.id === objId);
+  if (!obj) return;
+  document.getElementById('ops-reply-modal')?.remove();
+
+  if (action === 'approve') {
+    obj.status = 'approved';
+    obj.reply = reply;
+    obj.handledAt = now();
+    // whitelist objection: add to whitelist
+    if (type === 'whitelist') {
+      const dup = (act.whitelist||[]).find(w =>
+        (obj.authorId && w.authorId === obj.authorId) ||
+        (obj.xhsId && w.xhsId === obj.xhsId)
+      );
+      if (!dup) {
+        if (!act.whitelist) act.whitelist = [];
+        act.whitelist.push({ authorId: obj.authorId||'', xhsId: obj.xhsId||'', source: 'objection' });
+      }
+    }
+    toast('✅ 已通过异议，回复已发送');
+  } else if (action === 'reject') {
+    obj.status = 'rejected';
+    obj.rejectReason = reply;
+    obj.handledAt = now();
+    toast('已拒绝并回复作者');
+  } else if (action === 'vendor') {
+    obj.status = 'vendor_pending';
+    obj.vendorNote = reply;
+    obj.transferredAt = now();
+    toast('✅ 已转给厂商处理');
+  }
+  saveActivity(act);
+  renderOpsObjections();
+}
+
+function updateDataSummary() {
+  const activities = Object.values(getActivities());
+  const users = Object.values(getUsers());
+  document.getElementById('data-summary').textContent =
+    `共 ${activities.length} 个活动，白名单总计 ${activities.reduce((s,a)=>s+(a.whitelist||[]).length,0)} 人，注册创作者 ${users.length} 人`;
+}
+
+// ========== USER DATA ==========
+function getUsers() {
+  try {
+    const raw = localStorage.getItem('ecology_users_sky_v1');
+    if (raw) return JSON.parse(raw).users || {};
+  } catch(e) {}
+  return {};
+}
+function saveUsers(users) {
+  const val = { users };
+  localStorage.setItem('ecology_users_sky_v1', JSON.stringify(val));
+  _remoteSet('ecology_users_sky_v1', val); // 立即同步
+}
+function getUser(username) { return getUsers()[username]; }
+function saveUser(user) {
+  const users = getUsers();
+  users[user.username] = user;
+  saveUsers(users);
+}
+
+// ========== OPS CREATORS ==========
+function renderOpsCreators() {
+  const users = Object.values(getUsers());
+  const el = document.getElementById('ops-creators-content');
+
+  // IP filter state for creators
+  const activeIP = STATE.creatorsIPFilter || 'all';
+
+  const filtered = users.filter(u => {
+    if (activeIP === 'all') return true;
+    return (u.games || []).includes(activeIP);
+  });
+
+  const pending = filtered.filter(u => u.status === 'pending');
+  const approved = filtered.filter(u => u.status === 'approved');
+  const rejected = filtered.filter(u => u.status === 'rejected');
+
+  el.innerHTML = `
+    <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span style="font-size:14px;font-weight:600;color:#333">🎮 光遇 · 创作者管理（共 ${users.length} 人）</span>
+      <button class="btn btn-ghost btn-sm" onclick="syncFromRemote().then(()=>renderOpsCreators())" style="font-size:12px">🔄 刷新</button>
+    </div>
+    <div class="search-bar" style="margin-bottom:12px">
+      <input class="search-input" id="creators-search" placeholder="搜索用户名 / 作者ID / 小红书号" oninput="filterCreatorsSearch(this.value)">
+    </div>
+
+    ${pending.length ? `
+    <div class="section" style="margin-bottom:14px">
+      <div class="section-title"><span class="pending-dot"></span>待审核（${pending.length}）</div>
+      <div style="font-size:11px;color:var(--gray);padding:6px 14px;background:#fafafa;border-bottom:1px solid #f5f5f5;display:flex;gap:12px">
+        <span style="min-width:100px">用户名</span><span style="width:80px">密码</span><span style="width:60px">状态</span><span style="min-width:120px">作者ID</span><span>主页/截图</span>
+      </div>
+      ${pending.map(u => renderCreatorCard(u)).join('')}
+    </div>` : ''}
+
+    <div class="section" style="margin-bottom:14px">
+      <div class="section-title">已通过（${approved.length}）</div>
+      ${approved.length ? `
+      <div style="font-size:11px;color:var(--gray);padding:6px 14px;background:#fafafa;border-bottom:1px solid #f5f5f5;display:flex;gap:12px">
+        <span style="min-width:100px">用户名</span><span style="width:80px">密码</span><span style="width:60px">状态</span><span style="min-width:120px">作者ID</span><span>主页/截图</span>
+      </div>
+      ${approved.map(u => renderCreatorCard(u)).join('')}` : '<div style="color:#aaa;font-size:13px;padding:12px 14px">暂无</div>'}
+    </div>
+
+    ${rejected.length ? `
+    <div class="section" style="margin-bottom:14px">
+      <div class="section-title">已拒绝（${rejected.length}）</div>
+      <div style="font-size:11px;color:var(--gray);padding:6px 14px;background:#fafafa;border-bottom:1px solid #f5f5f5;display:flex;gap:12px">
+        <span style="min-width:100px">用户名</span><span style="width:80px">密码</span><span style="width:60px">状态</span><span style="min-width:120px">作者ID</span><span>主页/截图</span><span style="margin-left:auto">操作</span>
+      </div>
+      ${rejected.map(u => renderCreatorCard(u)).join('')}
+    </div>` : ''}
+  `;
+}
+
+function filterCreatorsIP(ip, el) {
+  STATE.creatorsIPFilter = ip;
+  renderOpsCreators();
+}
+
+function parseAuthorId(xhsLink) {
+  if (!xhsLink) return '';
+  // https://www.xiaohongshu.com/user/profile/5f1234567890abcdef123456
+  const m = xhsLink.match(/\/user\/profile\/([a-zA-Z0-9]+)/);
+  return m ? m[1] : '';
+}
+
+function renderCreatorCard(u) {
+  const statusMap = { pending: '待审核', approved: '已通过', rejected: '已拒绝' };
+  const statusClass = { pending: 'tag-pending', approved: 'tag-approved', rejected: 'tag-rejected' };
+  const authorId = u.authorId || parseAuthorId(u.xhsLink) || '-';
+  if (!u.authorId && authorId !== '-') { u.authorId = authorId; saveUser(u); }
+  return `
+    <div data-creator-row="${u.username} ${u.authorId||''} ${u.xhsLink||''}" style="display:flex;align-items:center;gap:12px;padding:9px 14px;border-bottom:1px solid #f5f5f5;flex-wrap:wrap">
+      <span style="font-weight:600;min-width:100px;font-size:13px">${u.username}</span>
+      <span style="font-size:11px;color:#888;width:80px;font-family:monospace">${u.password||'-'}</span>
+      <span class="tag ${statusClass[u.status]||'tag-pending'}" style="font-size:11px">${statusMap[u.status]||u.status}</span>
+      <span style="font-size:12px;color:var(--gray);min-width:120px" id="creator-id-${u.username}">ID: ${authorId}</span>
+      <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:2px 8px" onclick="editCreatorId('${u.username}')">编辑ID</button>
+      ${u.xhsLink ? `<a href="${u.xhsLink}" target="_blank" style="font-size:12px;color:var(--red)">主页↗</a>` : ''}
+      ${u.xhsScreenshot ? `<img src="${u.xhsScreenshot}" onclick="viewScreenshot('${u.username}')" title="点击查看截图" style="height:28px;border-radius:4px;border:1px solid var(--border);cursor:pointer">` : ''}
+      <span style="font-size:11px;color:#bbb;margin-left:auto">${fmtDate(u.createdAt)}</span>
+      <div class="btn-group" style="margin-left:8px">
+        ${u.status === 'pending' ? `
+          <button class="btn btn-success btn-sm" onclick="reviewCreator('${u.username}','approved')">通过</button>
+          <button class="btn btn-danger btn-sm" onclick="reviewCreator('${u.username}','rejected')">拒绝</button>
+        ` : u.status === 'approved' ? `
+          <button class="btn btn-danger btn-sm" onclick="reviewCreator('${u.username}','rejected')">撤销</button>
+        ` : `
+          <button class="btn btn-success btn-sm" onclick="reviewCreator('${u.username}','approved')">重新通过</button>
+          <button class="btn btn-sm" style="background:#fff1f0;color:#f5222d;border:1px solid #ffa39e" onclick="deleteCreator('${u.username}')">删除</button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function deleteCreator(username) {
+  if (!confirm(`确认删除创作者「${username}」？此操作不可撤销。`)) return;
+  const users = getUsers();
+  delete users[username];
+  saveUsers(users);
+  renderOpsCreators();
+  toast(`已删除 ${username}`);
+}
+
+function reviewCreator(username, status) {
+  const user = getUser(username);
+  if (!user) return;
+  user.status = status;
+  user.reviewedAt = now();
+  saveUser(user); // saveUsers 内已立即同步
+  renderOpsCreators();
+  toast(status === 'approved' ? `✅ 已通过 ${username} 的注册申请` : `已拒绝 ${username}`);
+}
+
+function viewScreenshot(username) {
+  const user = getUser(username);
+  if (!user || !user.xhsScreenshot) return;
+  const mask = document.createElement('div');
+  mask.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';
+  mask.innerHTML = `<img src="${user.xhsScreenshot}" style="max-width:90vw;max-height:90vh;border-radius:8px">`;
+  mask.onclick = () => document.body.removeChild(mask);
+  document.body.appendChild(mask);
+}
+
+function _downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(v => '"'+String(v===null||v===undefined?'':v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+}
+
+// 导出活动列表 CSV
+function exportActivitiesCSV() {
+  const rows = [['活动ID','活动名称','状态','创建时间','更新时间']];
+  Object.values(getActivities()).forEach(a => {
+    rows.push([a.id, a.name, STATUS_LABELS[a.status]||a.status, fmtDate(a.createdAt), fmtDate(a.updatedAt)]);
+  });
+  _downloadCSV(rows, `activities-${new Date().toISOString().slice(0,10)}.csv`);
+  toast('活动列表已导出 CSV');
+}
+
+// 导出白名单 CSV（所有活动合并）
+function exportWhitelistCSV() {
+  const rows = [['活动名称','作者ID','小红书号','来源','录入时间']];
+  Object.values(getActivities()).forEach(a => {
+    (a.whitelist||[]).forEach(w => {
+      const srcMap = {manual:'手动',objection:'异议',import:'导入'};
+      rows.push([a.name, w.authorId||'', w.xhsId||'', srcMap[w.source]||w.source||'', fmtDate(w.addedAt||a.updatedAt)]);
+    });
+  });
+  _downloadCSV(rows, `whitelist-${new Date().toISOString().slice(0,10)}.csv`);
+  toast('白名单已导出 CSV');
+}
+
+// 导出获奖名单 CSV（所有活动合并）
+function exportWinnersCSV() {
+  const rows = [['活动名称','作者ID','小红书号','公示链接','公示截止','获奖人数']];
+  Object.values(getActivities()).forEach(a => {
+    const wp = a.winnersPublish;
+    if (!wp || !wp.approvedAt) return;
+    (wp.list||[]).forEach(w => {
+      rows.push([a.name, w.authorId||'', w.xhsId||'', wp.link||'', wp.deadline||'', wp.winnersCount||'']);
+    });
+    if (!(wp.list||[]).length) {
+      rows.push([a.name, '(无名单数据)', '', wp.link||'', wp.deadline||'', wp.winnersCount||'']);
+    }
+  });
+  _downloadCSV(rows, `winners-${new Date().toISOString().slice(0,10)}.csv`);
+  toast('获奖名单已导出 CSV');
+}
+
+// 导出异议记录 CSV（所有活动合并）
+function exportObjectionsCSV() {
+  const rows = [['活动名称','异议类型','小红书号','作者ID','异议原因','状态','提交时间','运营回复']];
+  const statusMap = {pending:'待处理',approved:'已通过',rejected:'已拒绝',vendor_pending:'转给厂商'};
+  Object.values(getActivities()).forEach(a => {
+    (a.whitelistObjections||[]).forEach(o => {
+      rows.push([a.name,'白名单异议',o.xhsId||'',o.authorId||'',o.reason||'',statusMap[o.status]||o.status||'',fmtDate(o.createdAt),o.reply||'']);
+    });
+    (a.winnerObjections||[]).forEach(o => {
+      rows.push([a.name,'获奖异议',o.xhsId||'',o.authorId||'',o.reason||'',statusMap[o.status]||o.status||'',fmtDate(o.createdAt),o.reply||o.vendorReply||'']);
+    });
+  });
+  _downloadCSV(rows, `objections-${new Date().toISOString().slice(0,10)}.csv`);
+  toast('异议记录已导出 CSV');
+}
+
+function filterCreatorsSearch(kw) {
+  const q = kw.trim().toLowerCase();
+  document.querySelectorAll('#ops-creators-content [data-creator-row]').forEach(row => {
+    const text = row.dataset.creatorRow.toLowerCase();
+    row.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+function editCreatorId(username) {
+  const user = getUser(username);
+  if (!user) return;
+  const newId = prompt(`修改「${username}」的作者ID：`, user.authorId || '');
+  if (newId === null) return;
+  const trimmed = newId.trim();
+  if (trimmed && !/^[A-Za-z0-9]{24}$/.test(trimmed)) {
+    toast('作者ID格式不对（需24位字母数字）', 'error'); return;
+  }
+  user.authorId = trimmed;
+  saveUser(user);
+  const el = document.getElementById('creator-id-'+username);
+  if (el) el.textContent = 'ID: ' + (trimmed || '-');
+  toast('✅ 作者ID已更新');
+}
+
+function exportData() {
+  const data = getData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ecology-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('备份已导出');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.activities) throw new Error('格式错误');
+      showConfirm('确认导入', `导入将覆盖当前所有数据，共 ${Object.keys(data.activities).length} 个活动。确认继续？`, () => {
+        saveData(data);
+        renderOpsActivities();
+        updateDataSummary();
+        toast('数据已恢复');
+      });
+    } catch(err) { toast('导入失败：文件格式不正确'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ========== VENDOR ==========
+let vendorCurrentTab = 'activities';
+function vendorTab(tab) {
+  const tabs = ['activities','whitelist','notes','winners','objections'];
+  vendorCurrentTab = tab;
+  document.querySelectorAll('#page-vendor .tab').forEach((t,i) => {
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  tabs.forEach(t => {
+    document.getElementById('vendor-tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  if (tab === 'activities') renderVendorActivities();
+  if (tab === 'whitelist') renderVendorWhitelist();
+  if (tab === 'notes') renderVendorNotes();
+  if (tab === 'winners') renderVendorWinners();
+  if (tab === 'objections') {
+    renderVendorObjections();
+    // 切换到异议处理 Tab 时从 D1 拉最新数据并重渲染
+    syncFromRemote().then(() => renderVendorObjections()).catch(()=>{});
+  }
+}
+
+function getVendorActivities() {
+  return Object.values(getActivities()).filter(a => a.ip === STATE.ip).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+}
+
+function renderVendorWhitelist() {
+  const el = document.getElementById('vendor-whitelist-content');
+  const acts = getVendorActivities().filter(a => a.status !== 'draft');
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>暂无活动</div></div>';
+    return;
+  }
+  el.innerHTML = acts.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).map((a,idx) => {
+    const wl = a.whitelist || [];
+    const open = isWLOpen(a);
+    const closed = a.wlClosed || (a.wlDeadline && Date.now() > new Date(a.wlDeadline).getTime());
+    const bodyId = 'vendorwlb-'+a.id;
+    const isFirst = idx===0;
+    const innerHtml = (() => {
+
+    // 厂商只有在公示截止后才能看完整白名单
+    if (!closed && wl.length > 0) {
+      const deadlineInfo = a.wlDeadline
+        ? `公示截止时间：${a.wlDeadline.replace('T',' ')}`
+        : '公示进行中';
+      return `
+        <div class="section">
+          <div class="section-title">${a.name}</div>
+          <div class="alert alert-info">
+            ⏳ 白名单公示进行中，公示截止后方可查看完整名单。<br>
+            <span style="font-size:12px">${deadlineInfo}</span>
+          </div>
+          <div style="font-size:13px;color:var(--gray)">已有 ${wl.length} 人在白名单中</div>
+        </div>`;
+    }
+
+    if (!wl.length) {
+      return `
+        <div class="section">
+          <div class="section-title">${a.name}</div>
+          <div style="color:#aaa;font-size:13px">白名单尚未上传</div>
+        </div>`;
+    }
+
+    // 公示已结束，展示完整白名单（可折叠）
+    const previewCount = 10;
+    const hasMore = wl.length > previewCount;
+    const tableHtml = hasMore
+      ? `<div id="vwl-table-${a.id}">${renderPublicWLTable(wl.slice(0, previewCount), null)}</div>
+         <div style="text-align:center;margin-top:8px">
+           <button class="btn btn-ghost btn-sm" id="vwl-toggle-${a.id}" onclick="toggleVendorWLExpand('${a.id}',${wl.length})">▼ 点击展开全部 ${wl.length} 人</button>
+         </div>`
+      : `<div id="vwl-table-${a.id}">${renderPublicWLTable(wl, null)}</div>`;
+
+    return `
+      <div class="section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="section-title" style="margin-bottom:0">${a.name}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;color:#f5222d;font-weight:600">⛔ 公示已结束，共 ${wl.length} 人</span>
+            <button class="btn btn-outline btn-sm" onclick="downloadVendorWL('${a.id}','${a.name}')">⬇ 下载白名单</button>
+          </div>
+        </div>
+        ${tableHtml}
+      </div>`;
+    })();
+    return `
+    <div class="section" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-weight:600">${a.name}</span>
+          ${wl.length > 0
+            ? (closed
+                ? `<span style="font-size:12px;color:#f5222d">⛔ 公示已结束，共 ${wl.length} 人</span>`
+                : `<span style="font-size:12px;color:#389e0d">⏳ 公示中，共 ${wl.length} 人</span>`)
+            : `<span style="font-size:12px;color:#aaa">白名单尚未上传</span>`
+          }
+        </div>
+      </div>
+      <div id="${bodyId}" style="padding:0 18px 14px;">${innerHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleVendorWLExpand(actId, total) {
+  const tableEl = document.getElementById('vwl-table-'+actId);
+  const btn = document.getElementById('vwl-toggle-'+actId);
+  if (!tableEl) return;
+  const act = getActivity(actId);
+  const wl = act.whitelist || [];
+  const isExpanded = btn.dataset.expanded === '1';
+  if (isExpanded) {
+    tableEl.innerHTML = renderPublicWLTable(wl.slice(0,10), null);
+    btn.textContent = `▼ 点击展开全部 ${total} 人`;
+    btn.dataset.expanded = '0';
+  } else {
+    tableEl.innerHTML = renderPublicWLTable(wl, null);
+    btn.textContent = '▲ 收起';
+    btn.dataset.expanded = '1';
+  }
+}
+
+function downloadOpsWL(actId, actName) { downloadVendorWL(actId, actName); }
+
+function downloadVendorNotesCsv() {
+  const acts = getVendorActivities();
+  let allNotes = [];
+  acts.forEach(a => {
+    (a.opsNotes||[]).forEach(n => allNotes.push([n.noteId, n.remark||'', a.name, fmtDate(n.addedAt)]));
+    (a.notes||[]).forEach(n => allNotes.push([n.noteId, n.remark||n.title||'', a.name, fmtDate(n.addedAt||n.submittedAt)]));
+  });
+  if (!allNotes.length) { toast('暂无笔记数据'); return; }
+  const rows = [['笔记ID','备注','活动名称','时间'], ...allNotes];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='合规笔记.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+function downloadVendorWL(actId, actName) {
+  const act = getActivity(actId);
+  const wl = act.whitelist || [];
+  if (!wl.length) { toast('白名单为空'); return; }
+  const rows = [['作者ID','作者小红书号'], ...wl.map(r => [r.authorId||'', r.xhsId||''])];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `白名单_${actName}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function renderVendorActivities() {
+  const acts = getVendorActivities().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const el = document.getElementById('vendor-activity-list');
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>暂无活动，请等待运营创建</div></div>';
+    return;
+  }
+  el.innerHTML = acts.map(a => `
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <span class="activity-name">${a.name}</span>
+          <span style="margin-left:10px">${(a.whitelist||[]).length > 0 ? statusBadge(a.status) : '<span style="font-size:12px;color:#aaa;font-weight:400">白名单未公示</span>'}</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="openVendorEditDetail('${a.id}')">✏️ 编辑活动规则</button>
+      </div>
+      ${renderActivityDetailView(a.detail)}
+    </div>
+  `).join('');
+}
+
+function renderActivityDetailView(detail) {
+  if (!detail) return '<div style="color:#aaa;font-size:13px">尚未填写活动细则</div>';
+  const d = detail;
+  // upload mode
+  if (d.mode === 'upload') {
+    if (!d.uploadLink && !d.uploadDoc && !d.startTime) return '<div style="color:#aaa;font-size:13px">尚未填写活动细则</div>';
+    return `
+      <div style="font-size:13px;display:grid;gap:8px">
+        ${d.startTime ? `<div><b>活动时间：</b><span style="color:var(--red);font-weight:600">${(d.startTime||"").replace("T"," ")} ~ ${(d.endTime||"待定").replace("T"," ")}</span></div>` : ''}
+        ${d.uploadLink ? `<div><b>活动规则链接：</b><a href="${d.uploadLink}" target="_blank" style="color:var(--red);word-break:break-all">${d.uploadLink}</a></div>` : ''}
+        ${d.uploadDoc ? `<div><b>文档内容：</b><div style="background:#fafafa;border-radius:6px;padding:10px;max-height:180px;overflow-y:auto;white-space:pre-wrap;margin-top:4px;font-size:12px">${d.uploadDoc}</div></div>` : ''}
+      </div>`;
+  }
+  // framework mode
+  if (!d.startTime) return '<div style="color:#aaa;font-size:13px">尚未填写活动细则</div>';
+  const subHtml = (d.subActivities||[]).map((s,i) => `
+    <div class="sub-act-item" style="margin-top:8px">
+      <div style="font-weight:600;font-size:13px">子活动${i+1}：${s.name}</div>
+      <div style="font-size:12px;color:var(--gray)">${s.startTime||''} ~ ${s.endTime||''}</div>
+      ${s.rules ? `<div style="font-size:13px;margin-top:4px">${s.rules}</div>` : ''}
+      ${s.rewards ? `<div style="font-size:13px;color:var(--red)">${s.rewards}</div>` : ''}
+    </div>
+  `).join('');
+  return `
+    <div style="font-size:13px;display:grid;gap:8px">
+      <div><b>活动时间：</b>${d.startTime} ~ ${d.endTime}</div>
+      <div><b>发布规则：</b>${d.publishRules||'-'}</div>
+      <div><b>内容方向：</b>${d.contentDirection||'-'}</div>
+      <div><b>活动奖励：</b><span style="color:var(--red)">${d.rewards||'-'}</span></div>
+      <div><b>活动提示：</b>${d.tips||'-'}</div>
+      ${subHtml}
+    </div>
+  `;
+}
+
+let editingVendorActId = null;
+function openVendorEditDetail(actId) {
+  editingVendorActId = actId;
+  const act = getActivity(actId);
+  const d = act.detail || {};
+  const mode = d.mode || 'framework';
+  const subHtml = (d.subActivities||[]).map((s,i) => renderSubActForm(s,i)).join('');
+  document.getElementById('vendor-detail-form').innerHTML = `
+    <div class="alert alert-info" style="margin-bottom:12px">📌 建议点击「上传活动规则」提交链接给运营审核。</div>
+    <div class="form-row" style="margin-bottom:4px">
+      <div class="form-group"><label>活动开始时间 <span style="color:var(--red)">*</span></label><input type="datetime-local" class="form-input" id="vd-start" value="${d.startTime||''}"></div>
+      <div class="form-group"><label>活动结束时间 <span style="color:var(--red)">*</span></label><input type="datetime-local" class="form-input" id="vd-end" value="${d.endTime||''}"></div>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label>活动细则提交方式</label>
+      <div style="display:flex;gap:16px;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal">
+          <input type="radio" name="detail-mode" value="upload" ${mode==='upload'?'checked':''} onchange="toggleDetailMode('upload')">
+          上传活动规则（链接或文档）
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal">
+          <input type="radio" name="detail-mode" value="framework" ${mode!=='upload'?'checked':''} onchange="toggleDetailMode('framework')">
+          填写活动框架
+        </label>
+      </div>
+    </div>
+    <div id="vd-upload-section" style="display:${mode==='upload'?'block':'none'}">
+      <div class="form-group"><label>活动规则链接</label><input type="text" class="form-input" id="vd-upload-link" placeholder="https://..." value="${d.uploadLink||''}"></div>
+      <div class="form-group"><label>补充说明</label><textarea class="form-textarea" id="vd-upload-doc" style="min-height:120px" placeholder="可在此补充活动相关说明...">${d.uploadDoc||''}</textarea></div>
+    </div>
+    <div id="vd-framework-section" style="display:${mode!=='upload'?'block':'none'}">
+      <div class="form-group"><label>发布规则</label><textarea class="form-textarea" id="vd-rules">${d.publishRules||''}</textarea></div>
+      <div class="form-group"><label>内容方向</label><textarea class="form-textarea" id="vd-direction">${d.contentDirection||''}</textarea></div>
+      <div class="form-group"><label>活动奖励</label><textarea class="form-textarea" id="vd-rewards">${d.rewards||''}</textarea></div>
+      <div class="form-group"><label>活动提示</label><textarea class="form-textarea" id="vd-tips">${d.tips||''}</textarea></div>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="font-size:14px">子活动（节点/限时活动）</b>
+        <button class="btn btn-outline btn-sm" onclick="addSubAct()">＋ 添加子活动</button>
+      </div>
+      <div id="sub-acts-list">${subHtml}</div>
+    </div>
+  `;
+  openModal('modal-vendor-detail');
+}
+
+function toggleDetailMode(mode) {
+  document.getElementById('vd-upload-section').style.display = mode === 'upload' ? 'block' : 'none';
+  document.getElementById('vd-framework-section').style.display = mode !== 'upload' ? 'block' : 'none';
+}
+
+function renderSubActForm(s, i) {
+  return `<div class="sub-act-item" id="subact-${i}">
+    <button class="sub-act-del" onclick="removeSubAct(${i})">×</button>
+    <div class="form-group"><label>子活动名称</label><input type="text" class="form-input" data-sub="name" data-idx="${i}" value="${s.name||''}"></div>
+    <div class="form-row">
+      <div class="form-group"><label>开始时间</label><input type="datetime-local" class="form-input" data-sub="startTime" data-idx="${i}" value="${s.startTime||''}"></div>
+      <div class="form-group"><label>结束时间</label><input type="datetime-local" class="form-input" data-sub="endTime" data-idx="${i}" value="${s.endTime||''}"></div>
+    </div>
+    <div class="form-group"><label>规则</label><textarea class="form-textarea" data-sub="rules" data-idx="${i}">${s.rules||''}</textarea></div>
+    <div class="form-group"><label>奖励</label><input type="text" class="form-input" data-sub="rewards" data-idx="${i}" value="${s.rewards||''}"></div>
+  </div>`;
+}
+
+function addSubAct() {
+  const list = document.getElementById('sub-acts-list');
+  const i = list.children.length;
+  const div = document.createElement('div');
+  div.innerHTML = renderSubActForm({}, i);
+  list.appendChild(div.firstElementChild);
+}
+
+function removeSubAct(i) {
+  const el = document.getElementById('subact-'+i);
+  if (el) el.remove();
+  // Re-index
+  document.querySelectorAll('#sub-acts-list .sub-act-item').forEach((el,newI) => {
+    el.id = 'subact-'+newI;
+    el.querySelectorAll('[data-idx]').forEach(inp => inp.dataset.idx = newI);
+    el.querySelector('.sub-act-del').setAttribute('onclick', `removeSubAct(${newI})`);
+  });
+}
+
+function saveVendorDetail() {
+  const startTime = document.getElementById('vd-start')?.value;
+  const endTime = document.getElementById('vd-end')?.value;
+  if (!startTime || !endTime) { toast('⚠️ 请先填写活动开始和结束时间'); return; }
+  const act = getActivity(editingVendorActId);
+  // Collect sub activities
+  const subList = {};
+  document.querySelectorAll('#sub-acts-list [data-sub]').forEach(inp => {
+    const i = inp.dataset.idx;
+    if (!subList[i]) subList[i] = {};
+    subList[i][inp.dataset.sub] = inp.value || inp.textContent;
+  });
+  const subActivities = Object.values(subList);
+
+  const mode = document.querySelector('input[name="detail-mode"]:checked')?.value || 'framework';
+  act.detail = {
+    mode,
+    uploadLink: mode === 'upload' ? (document.getElementById('vd-upload-link')?.value || '') : '',
+    uploadDoc: mode === 'upload' ? (document.getElementById('vd-upload-doc')?.value || '') : '',
+    startTime: document.getElementById('vd-start')?.value || '',
+    endTime: document.getElementById('vd-end')?.value || '',
+    publishRules: document.getElementById('vd-rules')?.value || '',
+    contentDirection: document.getElementById('vd-direction')?.value || '',
+    rewards: document.getElementById('vd-rewards')?.value || '',
+    tips: document.getElementById('vd-tips')?.value || '',
+    subActivities
+  };
+
+  // Mark vendor_detail_submitted; reset detail_confirmed so ops must re-confirm
+  if (!act.timeline) act.timeline = [];
+  const existing = act.timeline.find(t => t.step === 'vendor_detail_submitted');
+  if (!existing) {
+    act.timeline.push({ step: 'vendor_detail_submitted', completedAt: now() });
+  } else {
+    existing.completedAt = now(); // update timestamp on re-submit
+  }
+  // Remove detail_confirmed so ops sees the re-confirm prompt again
+  act.timeline = act.timeline.filter(t => t.step !== 'detail_confirmed');
+  syncActivityStatus(act);
+
+  saveActivity(act);
+  closeModal('modal-vendor-detail');
+  renderVendorActivities();
+  toast('✅ 活动细则已提交，等待运营确认');
+}
+
+function renderVendorNotes() {
+  const acts = getVendorActivities().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const el = document.getElementById('vendor-notes-content');
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div>暂无活动</div></div>';
+    return;
+  }
+  el.innerHTML = acts.map((a,idx) => {
+    const confirmed = !!a.notesConfirmed;
+    const info = a.notesConfirmedInfo || {};
+    const bodyId = 'vendornb-'+a.id;
+    const isFirst = idx === 0;
+    return `
+    <div class="section" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-weight:600">${a.name}</span>
+          ${statusBadgeWL(a.status, a.whitelist)}
+          ${confirmed ? '<span style="font-size:12px;color:#389e0d">✅ 已发送</span>' : '<span style="font-size:12px;color:#aaa">⏳ 待发送</span>'}
+        </div>
+      </div>
+      <div id="${bodyId}" style="padding:0 18px 14px;">
+        ${confirmed
+          ? `<div style="color:#389e0d;font-size:13px">
+              ✅ 运营已发送合规笔记 · ${fmtDate(info.confirmedAt)}${info.note?' · '+info.note:''}
+              ${a.notesCount ? ' · 共 <b>'+a.notesCount+'</b> 条' : ''}
+             </div>`
+          : `<div style="color:#aaa;font-size:13px">⏳ 等待运营发送合规笔记...</div>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterVendorNotes(q) {
+  const acts = getVendorActivities();
+  let all = [];
+  acts.forEach(a => (a.notes||[]).forEach(n => all.push({...n, actName: a.name})));
+  const filtered = q ? all.filter(n => n.noteId.includes(q)||n.authorId.includes(q)||n.title.includes(q)) : all;
+  document.getElementById('vendor-notes-table').innerHTML = renderVendorNotesTable(filtered);
+}
+
+function renderVendorWinners() {
+  const acts = getVendorActivities().filter(a => ['active','collecting','vendor_review','winners_published','completed'].includes(a.status)).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const el = document.getElementById('vendor-winners-content');
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div>暂无可操作的活动</div></div>';
+    return;
+  }
+  el.innerHTML = acts.map((a,idx) => {
+    const wp = a.winnersPublish || {};
+    const submitted = !!wp.submittedAt;
+    const approved = !!wp.approvedAt;
+    const bodyId = 'vendorwb-'+a.id;
+    const isFirst = idx===0;
+    return `
+    <div class="section" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="activity-name">${a.name}</span> ${statusBadgeWL(a.status, a.whitelist)}
+          ${approved ? '<span style="font-size:12px;color:#389e0d">✅ 已发布</span>' : submitted ? '<span style="font-size:12px;color:#fa8c16">⏳ 待确认</span>' : '<span style="font-size:12px;color:#aaa">未提交</span>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px" onclick="event.stopPropagation()">
+          <button class="btn btn-primary btn-sm" onclick="openUploadWinners('${a.id}','vendor')">${submitted ? '✏️ 修改' : '📋 填写'}</button>
+        </div>
+      </div>
+      <div id="${bodyId}" style="padding:0 18px 14px;">
+        ${!submitted ? `<div style="color:#aaa;font-size:13px">暂未提交公示信息</div>` : `
+          <div style="background:#fafafa;border-radius:8px;padding:14px;font-size:13px;line-height:2">
+            <div><b>公示截止：</b>${wp.deadline ? wp.deadline.replace('T',' ') : '-'}</div>
+            <div><b>公示链接：</b><a href="${wp.link||'#'}" target="_blank" style="color:var(--red)">${wp.link||'-'}</a></div>
+            ${wp.note ? `<div><b>补充说明：</b>${wp.note}</div>` : ''}
+            <div><b>获奖人数：</b><span style="color:var(--red);font-weight:600">${wp.winnersCount||'未填写'}</span></div>
+            <div><b>获奖名单：</b>${(wp.list||[]).length} 条记录</div>
+            <div style="margin-top:8px">
+              ${approved
+                ? `<span style="color:#389e0d;font-weight:600">✅ 运营已确认发布，作者端可见</span>`
+                : `<span style="color:#fa8c16">⏳ 等待运营确认发布...</span>`
+              }
+            </div>
+          </div>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function importWinnersCSV(actId) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv,.tsv,.xlsx,.xls,.txt';
+  input.onchange = (e) => parseWinnersFile(e.target.files[0], actId);
+  input.click();
+}
+
+function parseWinnersFile(file, actId) {
+  if (!file) return;
+  const act = getActivity(actId);
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const text = ev.target.result.replace(/^\uFEFF/, '');
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (!lines.length) { toast('文件为空'); return; }
+    const delim = lines[0].includes('\t') ? '\t' : ',';
+    const headers = lines[0].split(delim).map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+    const idxMap = {
+      authorId: headers.findIndex(h => h.includes('作者id') || h.includes('author_id') || h === 'authorid'),
+      xhsId:    headers.findIndex(h => h.includes('小红书') || h.includes('xhs')),
+      name:     headers.findIndex(h => h === '姓名' || h === 'name'),
+      amount:   headers.findIndex(h => h.includes('金额') || h.includes('amount') || h.includes('奖励')),
+      noteId:   headers.findIndex(h => h.includes('笔记id') || h.includes('note')),
+    };
+    const rows = lines.slice(1);
+    const winners = [];
+    rows.forEach(row => {
+      const cols = row.split(delim).map(c => c.trim().replace(/^"|"$/g,''));
+      const authorId = idxMap.authorId >= 0 ? cols[idxMap.authorId] : '';
+      if (!authorId) return;
+      winners.push({
+        authorId,
+        xhsId:  idxMap.xhsId >= 0 ? cols[idxMap.xhsId] : '',
+        name:   idxMap.name >= 0 ? cols[idxMap.name] : '',
+        amount: idxMap.amount >= 0 ? cols[idxMap.amount] : '',
+        noteId: idxMap.noteId >= 0 ? cols[idxMap.noteId] : '',
+      });
+    });
+    if (!winners.length) { toast('⚠️ 未找到有效数据（需有「作者ID」列）'); return; }
+    if (act.winners && act.winners.length && !confirm(`已有 ${act.winners.length} 条数据，导入将覆盖，确认？`)) return;
+    act.winners = winners;
+    saveActivity(act);
+    renderVendorWinners();
+    toast(`✅ 导入完成，共 ${winners.length} 位获奖者`);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function downloadWinnersCsv(actId, actName) {
+  const act = getActivity(actId);
+  const winners = act.winners || [];
+  if (!winners.length) { toast('暂无数据'); return; }
+  const rows = [['作者ID','小红书号','姓名','奖励金额','笔记ID'], ...winners.map(w => [w.authorId, w.xhsId||'', w.name||'', w.amount||'', w.noteId||''])];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`获奖名单_${actName}.csv`; a.click(); URL.revokeObjectURL(url);
+}
+
+let _winnersList = null; // temp parsed winners list
+
+function parseWinnersListFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const text = ev.target.result.replace(/^\uFEFF/, '');
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (!lines.length) { toast('文件为空'); return; }
+    const sep = lines[0].includes('\t') ? '\t' : ',';
+    const headers = lines[0].split(sep).map(h => h.trim().replace(/"/g,''));
+    const idIdx = headers.findIndex(h => ['作者ID','用户群id','用户群ID'].includes(h));
+    const xhsIdx = headers.findIndex(h => ['作者小红书号','小红书号','小红书ID','小红书id','小红书用'].some(k => h.includes(k)));
+    const entries = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(sep).map(c => c.trim().replace(/"/g,''));
+      const authorId = idIdx >= 0 ? cols[idIdx]||'' : '';
+      const xhsId = xhsIdx >= 0 ? cols[xhsIdx]||'' : '';
+      if (authorId || xhsId) entries.push({ authorId, xhsId });
+    }
+    _winnersList = entries;
+    document.getElementById('winners-list-status').textContent = `已解析 ${entries.length} 条记录`;
+    document.getElementById('winners-list-preview').innerHTML =
+      entries.slice(0,3).map(e => `<div>作者ID: ${e.authorId||'-'} / 小红书号: ${e.xhsId||'-'}</div>`).join('') +
+      (entries.length > 3 ? `<div>...共 ${entries.length} 条</div>` : '');
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+let editingWinnersActId = null;
+function openUploadWinners(actId, role) {
+  editingWinnersActId = actId;
+  _winnersList = null;
+  const act = getActivity(actId);
+  const wp = act.winnersPublish || {};
+  document.getElementById('winners-deadline').value = wp.deadline || '';
+  document.getElementById('winners-count').value = wp.winnersCount || '';
+  document.getElementById('winners-link').value = wp.link || '';
+  document.getElementById('winners-note').value = wp.note || '';
+  document.getElementById('winners-list-file').value = '';
+  const existing = (wp.list||[]).length;
+  document.getElementById('winners-list-status').textContent = existing ? `已有 ${existing} 条记录（可重新上传覆盖）` : '未上传';
+  document.getElementById('winners-list-preview').innerHTML = '';
+  // Set UI by role
+  const isOps = role === 'ops';
+  document.getElementById('upload-winners-title').textContent = isOps ? '编辑获奖公示信息' : '提交获奖公示信息';
+  document.getElementById('upload-winners-hint').style.display = isOps ? 'none' : 'block';
+  document.getElementById('upload-winners-btn').textContent = isOps ? '保存公示信息' : '提交给运营确认';
+  openModal('modal-upload-winners');
+}
+
+function saveWinners() {
+  const deadline = document.getElementById('winners-deadline').value;
+  const winnersCount = document.getElementById('winners-count').value.trim();
+  const link = document.getElementById('winners-link').value.trim();
+  if (!deadline) { toast('⚠️ 请填写公示截止时间'); return; }
+  if (!winnersCount) { toast('⚠️ 请填写获奖人数'); return; }
+  if (!link) { toast('⚠️ 请填写公示链接'); return; }
+  // 厂商必须上传获奖名单（运营不做强制，可追加）
+  const isOpsMode = document.getElementById('upload-winners-btn').textContent === '保存公示信息';
+  const prevList = (getActivity(editingWinnersActId)?.winnersPublish?.list || []);
+  if (!isOpsMode && _winnersList === null && prevList.length === 0) {
+    toast('⚠️ 请上传获奖名单 CSV，作者端查询依赖此名单'); return;
+  }
+  const act = getActivity(editingWinnersActId);
+  const prevWp = act.winnersPublish || {};
+  act.winnersPublish = {
+    deadline,
+    winnersCount: parseInt(winnersCount, 10),
+    link,
+    note: document.getElementById('winners-note').value.trim(),
+    list: _winnersList !== null ? _winnersList : (prevWp.list || []),
+    submittedAt: now(),
+    approvedAt: null,
+  };
+  saveActivity(act);
+  closeModal('modal-upload-winners');
+  const isOps = document.getElementById('upload-winners-btn').textContent === '保存公示信息';
+  if (isOps) {
+    renderOpsWinners();
+    toast('✅ 公示信息已保存');
+  } else {
+    renderVendorWinners();
+    toast('✅ 已提交给运营确认，等待发布');
+  }
+}
+
+function renderVendorObjections() {
+  const acts = getVendorActivities().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  const el = document.getElementById('vendor-objections-content');
+  const refreshBtn = '<div style="text-align:right;margin-bottom:12px"><button class="btn btn-ghost btn-sm" onclick="syncFromRemote().then(()=>renderVendorObjections())" style="font-size:12px">🔄 刷新异议</button></div>';
+  const allActs = acts.filter(a => (a.winnerObjections||[]).some(o => o.status === 'vendor_pending' || o.vendorHandledAt));
+  if (!allActs.length) {
+    el.innerHTML = refreshBtn + '<div class="empty"><div class="empty-icon">📬</div><div>暂无待处理异议</div></div>';
+    return;
+  }
+  let vendorObjHtml = allActs.map((a,idx) => {
+    const all = (a.winnerObjections||[]).filter(o => o.status === 'vendor_pending' || o.vendorHandledAt).map(o=>({...o,actId:a.id,actName:a.name}));
+    const pending = all.filter(o=>o.status==='vendor_pending');
+    const bodyId = 'vendorobj-'+a.id;
+    const isFirst = idx===0;
+    const renderCard = (o, showAction) => `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:600;font-size:13px">${a.name}</div>
+          <span class="tag tag-${showAction?'pending':'approved'}">${showAction?'待回复':'已回复'}</span>
+        </div>
+        <div style="font-size:13px;line-height:1.9">
+          <div><b>作者ID：</b>${o.authorId||'-'}</div>
+          <div><b>小红书号：</b>${o.xhsId||'-'}</div>
+          <div><b>异议原因：</b>${o.reason||'-'}</div>
+          ${o.vendorNote ? `<div style="color:var(--gray)"><b>运营备注：</b>${o.vendorNote}</div>` : ''}
+        </div>
+        ${showAction ? `
+          <div class="form-group" style="margin-top:10px">
+            <label style="font-size:13px;font-weight:600">回复作者 <span style="color:var(--red)">*</span>（将展示给作者）</label>
+            <textarea class="form-textarea" id="vendor-obj-reply-${o.id}" style="min-height:72px;font-size:13px" placeholder="请告知作者处理情况，如需修改公示请同时前往「获奖公示」Tab 更新..."></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="vendorReplyObjection('${a.id}','${o.id}')">✅ 回复作者</button>
+        ` : `
+          <div style="font-size:13px;color:#389e0d;margin-top:8px"><b>已回复：</b>${o.vendorReply||'-'}</div>
+          <div style="font-size:12px;color:var(--gray)">回复时间：${fmtDate(o.vendorHandledAt)}</div>
+        `}
+      </div>
+    `;
+    return `
+    <div class="section" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-weight:600">${a.name}</span> ${statusBadgeWL(a.status, a.whitelist)}
+          ${pending.length ? `<span style="font-size:12px;color:var(--red);font-weight:600">● ${pending.length} 条待回复</span>` : '<span style="font-size:12px;color:#aaa">无待处理</span>'}
+        </div>
+      </div>
+      <div id="${bodyId}" style="padding:0 18px 14px;">
+        ${all.map(o=>renderCard(o, o.status==='vendor_pending')).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML = refreshBtn + vendorObjHtml;
+}
+
+function vendorReplyObjection(actId, objId) {
+  const act = getActivity(actId);
+  const obj = (act.winnerObjections||[]).find(o => o.id === objId);
+  if (!obj) return;
+  const reply = (document.getElementById('vendor-obj-reply-'+objId)?.value||'').trim();
+  if (!reply) { toast('请填写回复内容'); return; }
+  obj.vendorReply = reply;
+  obj.vendorHandledAt = now();
+  obj.status = 'approved'; // mark resolved
+  obj.reply = reply; // also visible to author
+  obj.handledAt = now();
+  saveActivity(act);
+  renderVendorObjections();
+  toast('✅ 已回复作者');
+}
+
+// ========== AUTHOR MAIN ==========
+function isAnyWLClosed() {
+  // 当前IP下是否有任一活动白名单已截止（公示结束）
+  return Object.values(getActivities()).some(a =>
+    a.ip === STATE.ip &&
+    ['whitelist_ready','active','collecting','vendor_review','winners_published','completed'].includes(a.status) &&
+    !isWLOpen(a)
+  );
+}
+
+function updateAuthorRulesTabVisibility() {
+  const tabs = document.querySelectorAll('#author-main .tab');
+  // tabs order: status(0), whitelist(1), rules(2), objection(3)
+  const rulesTabEl = tabs[2];
+  if (!rulesTabEl) return;
+  const show = isAnyWLClosed();
+  rulesTabEl.style.display = show ? '' : 'none';
+  // if currently on rules tab but now hidden, switch to whitelist
+  if (!show && authorCurrentTab === 'rules') authorTabLegacy('whitelist');
+}
+
+function authorTabLegacy(tab) {
+  authorCurrentTab = tab;
+  document.querySelectorAll('#author-main .tab').forEach((t,i) => {
+    t.classList.toggle('active', ['status','whitelist','rules','winners','objection'][i] === tab);
+  });
+  ['status','whitelist','rules','winners','objection'].forEach(t => {
+    const el = document.getElementById('author-tab-'+t); if (el) el.style.display = t===tab ? 'block' : 'none';
+  });
+  if (tab === 'status') { if(typeof renderAuthorStatus==='function') renderAuthorStatus(); }
+  if (tab === 'whitelist') { if(typeof renderAuthorWhitelist==='function') renderAuthorWhitelist(); }
+  if (tab === 'rules') { if(typeof renderAuthorRules==='function') renderAuthorRules(); }
+  if (tab === 'winners') { if(typeof renderAuthorWinners==='function') renderAuthorWinners(); }
+  if (tab === 'objection') { if(typeof renderAuthorObjection==='function') renderAuthorObjection(); }
+}
+
+function getAuthorMatchKey() {
+  // Returns the xhsLink of current user for matching against whitelist
+  return STATE.authorUser ? STATE.authorUser.xhsLink : null;
+}
+
+function matchWL(wlEntry, user) {
+  if (!user) return false;
+  // 优先用 user.authorId 直接匹配（运营修改后的权威字段）
+  if (wlEntry.authorId && user.authorId && wlEntry.authorId === user.authorId) return true;
+  // 用 xhsId 匹配 user.authorId
+  if (wlEntry.xhsId && user.authorId && user.authorId === wlEntry.xhsId) return true;
+  // 用 xhsId 匹配 user.xhsLink
+  if (wlEntry.xhsId && user.xhsLink && user.xhsLink.includes(wlEntry.xhsId)) return true;
+  // 用 authorId 匹配 user.xhsLink
+  if (wlEntry.authorId && user.xhsLink && user.xhsLink.includes(wlEntry.authorId)) return true;
+  // 用户名匹配
+  if (wlEntry.name && user.username && wlEntry.name === user.username) return true;
+  return false;
+}
+
+function matchWinner(winnerEntry, user) {
+  if (!user) return false;
+  if (winnerEntry.authorId && user.authorId && winnerEntry.authorId === user.authorId) return true;
+  if (winnerEntry.xhsId && user.authorId && user.authorId === winnerEntry.xhsId) return true;
+  if (winnerEntry.xhsId && user.xhsLink && user.xhsLink.includes(winnerEntry.xhsId)) return true;
+  if (winnerEntry.authorId && user.xhsLink && user.xhsLink.includes(winnerEntry.authorId)) return true;
+  if (winnerEntry.name && user.username && winnerEntry.name === user.username) return true;
+  return false;
+}
+
+function renderAuthorStatus() {
+  checkExpiredWLDeadlines();
+  const el = document.getElementById('author-status-content');
+  const user = STATE.authorUser;
+  const acts = Object.values(getActivities()).filter(a => a.ip === STATE.ip && a.status !== 'draft').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>暂无进行中的活动</div></div>';
+    return;
+  }
+  el.innerHTML = acts.map(a => {
+    const inWL = (a.whitelist||[]).find(w => matchWL(w, user));
+    const isWinner = (a.winners||[]).find(w => matchWinner(w, user));
+    const wlPublished = (a.whitelist||[]).length > 0;
+    const wlStatusHtml = inWL
+      ? `<div class="big-status"><div class="big-status-icon">✅</div><div class="big-status-title" style="color:#389e0d">已在白名单</div><div class="big-status-sub">作者ID：${inWL.authorId||'-'} | 小红书号：${inWL.xhsId||'-'}</div></div>`
+      : !wlPublished
+        ? `<div class="big-status"><div class="big-status-icon">⏳</div><div class="big-status-title" style="color:#fa8c16">白名单尚未公示</div><div class="big-status-sub">活动白名单公示后可在此查看</div></div>`
+        : `<div class="big-status"><div class="big-status-icon">❌</div><div class="big-status-title" style="color:#f5222d">不在白名单中</div><div class="big-status-sub">如有疑问，可在「提交异议」标签提交申请</div></div>`;
+    const winnerHtml = isWinner
+      ? `<div class="alert alert-success" style="margin-top:12px">🏆 恭喜！您在本活动中获奖，奖励：¥${isWinner.amount}</div>`
+      : (a.status === 'winners_published' || a.status === 'completed' ? `<div class="alert alert-warn" style="margin-top:12px">获奖名单已公示，您暂未在获奖名单中</div>` : '');
+    // 活动是否已开始
+    const startTime = a.detail?.startTime;
+    const hasStarted = startTime && Date.now() >= new Date(startTime).getTime();
+    const activeStatuses = ['active','collecting','vendor_review'];
+    const participateHtml = (hasStarted || activeStatuses.includes(a.status)) && !['winners_published','completed'].includes(a.status)
+      ? `<div class="alert alert-success" style="margin-top:12px;background:#f6ffed;border-color:#b7eb8f;color:#135200">
+           🎉 活动正在进行中，快去参与吧！
+           ${a.detail?.publishRules ? `<div style="margin-top:4px;font-size:12px;color:#389e0d">发布要求：${a.detail.publishRules}</div>` : ''}
+         </div>`
+      : '';
+    return `
+      <div class="section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span class="activity-name">${a.name}</span>
+          ${wlPublished ? statusBadge(a.status) : `<span class="status-badge" style="background:#f5f5f5;color:#999">白名单未公示</span>`}
+        </div>
+        ${wlStatusHtml}${participateHtml}${winnerHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+function isWLOpen(act) {
+  if (act.wlClosed) return false;
+  if (!act.wlDeadline) return true; // no deadline = open
+  return Date.now() < new Date(act.wlDeadline).getTime();
+}
+
+function renderAuthorWhitelist() {
+  const el = document.getElementById('author-whitelist-content');
+  const acts = Object.values(getActivities()).filter(a =>
+    a.ip === STATE.ip &&
+    ['whitelist_ready','active','collecting','vendor_review','winners_published','completed'].includes(a.status) &&
+    (a.whitelist||[]).length > 0
+  ).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><div>白名单尚未公示</div></div>';
+    return;
+  }
+  el.innerHTML = acts.map(a => {
+    const wl = a.whitelist || [];
+    const user = STATE.authorUser;
+    const myEntry = wl.find(w => matchWL(w, user));
+    const open = isWLOpen(a);
+    const deadlineLabel = a.wlClosed
+      ? '<span style="color:#f5222d;font-size:12px">⛔ 异议已关闭</span>'
+      : a.wlDeadline
+        ? `<span style="font-size:12px;color:${open?'#389e0d':'#f5222d'}">${open?'⏰':'⌛'} 异议截止：${a.wlDeadline.replace('T',' ')}</span>`
+        : '<span style="font-size:12px;color:#aaa">异议开放中</span>';
+
+    const statusBlock = myEntry
+      ? `<div style="display:flex;align-items:center;gap:10px;padding:16px 0;border-top:1px solid var(--border);margin-top:4px">
+           <span style="font-size:28px">✅</span>
+           <div><div style="font-weight:700;font-size:15px;color:#389e0d">您已在白名单中</div>
+           <div style="font-size:12px;color:var(--gray);margin-top:2px">如有疑问可在「提交&查看异议」Tab 提交异议</div></div>
+         </div>`
+      : `<div style="display:flex;align-items:center;gap:10px;padding:16px 0;border-top:1px solid var(--border);margin-top:4px">
+           <span style="font-size:28px">❌</span>
+           <div><div style="font-weight:700;font-size:15px;color:#f5222d">您不在白名单中</div>
+           <div style="font-size:12px;color:var(--gray);margin-top:2px">如有疑问可在「提交&查看异议」Tab 提交异议</div></div>
+         </div>`;
+
+    return `
+      <div class="section" style="margin-bottom:14px">
+        <div style="padding:14px 18px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+            <span class="activity-name">${a.name}</span>
+            ${deadlineLabel}
+          </div>
+          ${statusBlock}
+          ${!open && !a.wlClosed ? `<div class="alert alert-warn" style="margin-top:8px">⌛ 异议提交已截止，无法再提交异议</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAuthorWLExpand(actId, total) {
+  const tableEl = document.getElementById('awl-table-'+actId);
+  const btn = document.getElementById('awl-toggle-'+actId);
+  if (!tableEl) return;
+  const act = getActivity(actId);
+  const wl = act.whitelist || [];
+  const user = STATE.authorUser;
+  const isExpanded = btn.dataset.expanded === '1';
+  if (isExpanded) {
+    tableEl.innerHTML = renderPublicWLTable(wl.slice(0,5), user);
+    btn.textContent = `▼ 点击展开全部 ${total} 人`;
+    btn.dataset.expanded = '0';
+  } else {
+    tableEl.innerHTML = renderPublicWLTable(wl, user);
+    btn.textContent = '▲ 收起';
+    btn.dataset.expanded = '1';
+  }
+}
+
+function renderPublicWLTable(wl, user) {
+  if (!wl.length) return '<div style="color:#aaa;font-size:13px;padding:12px 0">白名单为空</div>';
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>序号</th><th>作者ID</th><th>小红书号</th></tr></thead>
+    <tbody>${wl.map((r,i) => {
+      const isMe = user && matchWL(r, user);
+      return `<tr style="${isMe?'background:#fff0f2;font-weight:600':''}">
+        <td>${i+1}${isMe?' 👈':''}</td><td>${r.authorId||'-'}</td><td>${r.xhsId||'-'}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`;
+}
+
+function filterAuthorWL(q, tableId, actId) {
+  const act = getActivity(actId);
+  const wl = act.whitelist||[];
+  const filtered = q ? wl.filter(r =>
+    (r.authorId||'').includes(q)||(r.xhsId||'').includes(q)
+  ) : wl;
+  const el = document.getElementById(tableId);
+  if (!el) return;
+  el.innerHTML = renderPublicWLTable(filtered, STATE.authorUser);
+  if (q && filtered.length !== wl.length) {
+    el.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:var(--gray);margin-top:6px">搜索结果 ${filtered.length} 条</div>`);
+  }
+}
+
+function renderAuthorWinners() {
+  const el = document.getElementById('author-winners-content');
+  const acts = Object.values(getActivities()).filter(a =>
+    a.ip === STATE.ip &&
+    a.winnersPublish && a.winnersPublish.approvedAt
+  ).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div>暂无已发布的获奖公示</div></div>';
+    return;
+  }
+  const user = STATE.authorUser;
+  el.innerHTML = acts.map((a,idx) => {
+    const wp = a.winnersPublish;
+    const deadline = wp.deadline ? wp.deadline.replace('T',' ') : '-';
+    const isExpired = wp.deadline && Date.now() > new Date(wp.deadline).getTime();
+    const list = wp.list || [];
+    const inList = list.length > 0 && list.some(w =>
+      (w.authorId && user.authorId && w.authorId === user.authorId) ||
+      (w.xhsId && user.xhsLink && (
+        user.xhsLink.includes(w.xhsId) ||
+        w.xhsId === (user.xhsLink||'').replace(/\/+$/,'').split('/').pop()
+      ))
+    );
+    const resultBadge = list.length === 0 ? '' : inList
+      ? `<div style="margin:10px 0;padding:12px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;color:#389e0d;font-weight:600;font-size:14px">🏆 恭喜！您在本次活动中获奖</div>`
+      : `<div style="margin:10px 0;padding:12px;background:#fafafa;border:1px solid var(--border);border-radius:8px;color:#aaa;font-size:13px">本次未获奖，感谢您的参与</div>`;
+    const bodyId = 'authwb-'+a.id;
+    const isFirst = idx===0;
+    return `
+      <div class="section" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span class="activity-name">${a.name}</span>
+            ${isExpired ? '<span style="font-size:12px;color:#aaa">⌛ 公示已结束</span>' : '<span style="font-size:12px;color:#389e0d">📢 公示中</span>'}
+            ${list.length > 0 ? (inList ? '<span class="tag tag-approved" style="font-size:11px">🏆 获奖</span>' : '<span style="font-size:12px;color:#aaa">未获奖</span>') : ''}
+          </div>
+        </div>
+        <div id="${bodyId}" style="padding:0 18px 14px;">
+          ${resultBadge}
+          <div style="font-size:13px;line-height:2">
+            <div><b>公示截止：</b>${deadline}</div>
+            <div><b>获奖名单：</b><a href="${wp.link}" target="_blank" style="color:var(--red);font-weight:600">点击查看在线文档 →</a></div>
+            ${wp.note ? `<div style="color:var(--gray)">${wp.note}</div>` : ''}
+            ${list.length ? `<div style="font-size:12px;color:var(--gray)">名单共 ${list.length} 人</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAuthorRules() {
+  const el = document.getElementById('author-rules-content');
+  const acts = Object.values(getActivities()).filter(a => a.ip === STATE.ip && a.status !== 'draft').sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📖</div><div>暂无活动规则</div></div>';
+    return;
+  }
+  el.innerHTML = acts.map(a => `
+    <div class="section">
+      <div class="section-title">${a.name}</div>
+      ${renderActivityDetailView(a.detail)}
+    </div>
+  `).join('');
+}
+
+function renderAuthorObjection() {
+  const el = document.getElementById('author-objection-content');
+  const user = STATE.authorUser;
+  const acts = Object.values(getActivities()).filter(a =>
+    a.ip === STATE.ip && ['whitelist_ready','active','collecting','vendor_review','winners_published'].includes(a.status)
+  ).sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+
+  // My objections
+  let myObjections = [];
+  Object.values(getActivities()).filter(a => a.ip === STATE.ip).forEach(a => {
+    (a.whitelistObjections||[]).filter(o => o.submittedBy === user.username).forEach(o =>
+      myObjections.push({...o, type:'白名单异议', actName:a.name})
+    );
+    (a.winnerObjections||[]).filter(o => o.submittedBy === user.username).forEach(o =>
+      myObjections.push({...o, type:'获奖异议', actName:a.name})
+    );
+  });
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="section-title">提交异议</div>
+      <div class="alert" style="background:#fff7e6;border:1px solid #ffd666;color:#874d00;margin-bottom:12px">
+        ⚠️ <b>提交前必读：</b>作者ID 和 小红书号请填写正确，填写错误运营将默认该异议无需处理。
+      </div>
+      ${!acts.length ? '<div style="color:#aaa;font-size:13px">暂无可提交异议的活动</div>' : `
+        <div class="form-group"><label>选择活动 <span style="color:var(--red)">*</span></label>
+          <select class="form-select" id="obj-act-select">
+            ${acts.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group"><label>异议类型 <span style="color:var(--red)">*</span></label>
+          <select class="form-select" id="obj-type-select">
+            <option value="whitelist">白名单异议（我应该在白名单中）</option>
+            <option value="winner">获奖异议（对获奖结果有异议）</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>作者ID <span style="color:var(--red)">*</span></label>
+          <input type="text" class="form-input" id="obj-author-id" placeholder="请填写您的作者ID（必填）">
+        </div>
+        <div class="form-group">
+          <label>作者小红书号 <span style="color:var(--red)">*</span></label>
+          <input type="text" class="form-input" id="obj-xhs-id" placeholder="请填写您的小红书号（必填）">
+        </div>
+        <div class="form-group"><label>异议原因 <span style="color:var(--red)">*</span></label>
+          <textarea class="form-textarea" id="obj-reason" placeholder="请详细描述您的异议原因"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="submitObjection()" style="width:100%">提交异议</button>
+      `}
+    </div>
+    ${myObjections.length ? `
+      <div class="section">
+        <div class="section-title">我的异议记录（${myObjections.length}）</div>
+        ${myObjections.map((o,idx) => `
+          <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div style="font-weight:600;font-size:13px">${o.actName} · ${o.type}</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="tag tag-${o.status}">${{pending:'待处理',approved:'已通过',rejected:'已拒绝'}[o.status]||o.status}</span>
+                <button class="btn btn-outline btn-sm" onclick="toggleObjDetail('objd-${idx}')">查看详情</button>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--gray)">提交时间：${fmtDate(o.createdAt)}</div>
+            <div id="objd-${idx}" style="display:none;margin-top:10px;font-size:13px;background:#fafafa;border-radius:6px;padding:10px;line-height:1.9">
+              <div><b>作者ID：</b>${o.authorId||'-'}</div>
+              <div><b>小红书号：</b>${o.xhsId||'-'}</div>
+              <div><b>异议原因：</b>${o.reason||'-'}</div>
+              ${o.status==='rejected' ? `<div style="color:#f5222d"><b>拒绝理由：</b>${o.rejectReason||'-'}</div>` : ''}
+              ${o.status==='approved' && o.reply ? `<div style="color:#389e0d"><b>处理说明：</b>${o.reply}</div>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+}
+
+function toggleObjDetail(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function submitObjection() {
+  const user = STATE.authorUser;
+  const actId = document.getElementById('obj-act-select').value;
+  const type = document.getElementById('obj-type-select').value;
+  const reason = document.getElementById('obj-reason').value.trim();
+  const act = getActivity(actId);
+
+  // Phase validation
+  if (type === 'whitelist') {
+    if (!(act.whitelist && act.whitelist.length > 0)) {
+      toast('⚠️ 白名单尚未公示，暂无法提交白名单异议'); return;
+    }
+    if (!isWLOpen(act)) {
+      toast('⌛ 白名单异议提交已截止，无法提交'); return;
+    }
+  }
+  if (type === 'winner') {
+    if (!(act.winnersPublish && act.winnersPublish.approvedAt)) {
+      toast('⚠️ 获奖名单尚未公布，暂无法提交获奖异议'); return;
+    }
+  }
+
+  // Author ID validation: 24 chars, alphanumeric only
+  const objAuthorId = (document.getElementById('obj-author-id')?.value||'').trim();
+  const objXhsId = (document.getElementById('obj-xhs-id')?.value||'').trim();
+  const authorIdErrEl = document.getElementById('obj-author-id-err');
+  if (!objAuthorId) {
+    if(authorIdErrEl){authorIdErrEl.textContent='请填写作者ID';authorIdErrEl.style.display='block';}
+    toast('⚠️ 请填写作者ID'); return;
+  }
+  if (objAuthorId.length !== 24) {
+    if(authorIdErrEl){authorIdErrEl.textContent='作者ID必须为24个字符，当前长度：'+objAuthorId.length;authorIdErrEl.style.display='block';}
+    toast('⚠️ 作者ID必须为24个字符'); return;
+  }
+  if (!/^[A-Za-z0-9]+$/.test(objAuthorId)) {
+    if(authorIdErrEl){authorIdErrEl.textContent='作者ID只能包含字母和数字，不能包含特殊字符';authorIdErrEl.style.display='block';}
+    toast('⚠️ 作者ID格式错误，不能包含特殊字符'); return;
+  }
+  if(authorIdErrEl) authorIdErrEl.style.display='none';
+  if (!objXhsId) { toast('⚠️ 请填写作者小红书号'); return; }
+  if (!reason) { toast('请填写异议原因'); return; }
+
+  const obj = {
+    id: genId(),
+    submittedBy: user.username,
+    requesterName: user.username,
+    xhsLink: user.xhsLink,
+    xhsId: objXhsId || '',
+    authorId: objAuthorId || '',
+    reason,
+    status: 'pending',
+    reply: '',
+    rejectReason: '',
+    createdAt: now()
+  };
+
+  if (type === 'whitelist') {
+    if (!act.whitelistObjections) act.whitelistObjections = [];
+    act.whitelistObjections.push(obj);
+  } else {
+    const winner = (act.winners||[]).find(w => matchWinner(w, user));
+    obj.name = user.username;
+    obj.originalAmount = winner ? winner.amount : '';
+    obj.finalAmount = '';
+    if (!act.winnerObjections) act.winnerObjections = [];
+    act.winnerObjections.push(obj);
+  }
+  saveActivity(act);
+  renderAuthorObjection();
+  document.getElementById('obj-reason').value = '';
+  if (document.getElementById('obj-author-id')) document.getElementById('obj-author-id').value = '';
+  if (document.getElementById('obj-xhs-id')) document.getElementById('obj-xhs-id').value = '';
+  toast('✅ 异议已提交，请等待运营处理');
+}
+
+function renderOpsWinners() {
+  const el = document.getElementById('ops-winners-content');
+  if (!el) return;
+  const acts = Object.values(getActivities()).sort((a,b) => (b.createdAt||0)-(a.createdAt||0));
+  if (!acts.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div>暂无活动</div></div>';
+    return;
+  }
+  el.innerHTML = acts.map(a => {
+    const wp = a.winnersPublish || {};
+    const id = a.id;
+    return `
+    <div class="section" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span class="activity-name">${a.name}</span>
+          ${statusBadgeWL(a.status, a.whitelist)}
+          ${wp.submittedAt && !wp.approvedAt ? '<span style="font-size:12px;color:#eb2f96;font-weight:600">● 待确认发布</span>' : ''}
+          ${wp.approvedAt ? '<span style="font-size:12px;color:#389e0d">✅ 已发布</span>' : ''}
+        </div>
+      </div>
+      <div id="opswb-${id}" style="padding:0 20px 16px">
+        ${!wp.submittedAt ? '<div style="color:#aaa;font-size:13px">⏳ 厂商尚未提交公示信息</div>' : `
+          <div style="background:#fafafa;border-radius:8px;padding:14px;font-size:13px;line-height:2;margin-bottom:12px">
+            <div><b>公示截止：</b>${(wp.deadline||'-').replace('T',' ')}</div>
+            <div><b>公示链接：</b><a href="${wp.link||'#'}" target="_blank" style="color:var(--red)">${wp.link||'-'}</a></div>
+            ${wp.note ? '<div><b>补充说明：</b>'+wp.note+'</div>' : ''}
+            <div><b>获奖人数：</b><span style="color:var(--red);font-weight:600">${wp.winnersCount||'未填写'}</span></div>
+            <div><b>获奖名单：</b>${(wp.list||[]).length} 条记录</div>
+            <div style="margin-top:8px">
+              ${wp.approvedAt
+                ? '<span style="color:#389e0d">✅ 已确认发布（'+fmtDate(wp.approvedAt)+'）</span>'
+                : '<span style="color:#fa8c16;font-weight:600">⚠️ 厂商已提交，待运营确认</span><button class="btn btn-primary btn-sm" style="margin-left:12px" onclick="event.stopPropagation();opsApproveWinners(\''+id+'\')">确认发布</button>'
+              }
+            </div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();STATE.currentActivity='${id}';openUploadWinners('${id}','ops')">✏️ 编辑公示信息</button>
+            ${wp.approvedAt ? '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();revokeOpsWinners(\''+id+'\')">撤销发布</button>' : ''}
+          </div>
+        `}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function revokeOpsWinners(actId) {
+  if (!confirm('确认撤销发布？作者端将无法再看到此获奖公示')) return;
+  const act = getActivity(actId);
+  if (act.winnersPublish) { act.winnersPublish.approvedAt = null; }
+  saveActivity(act);
+  renderOpsWinners();
+  toast('已撤销发布');
+}
+
+function toggleCollapse(bodyId) {
+  const body = document.getElementById(bodyId);
+  if (!body) return;
+  // Find the collapse-btn in the sibling header (previous sibling)
+  const header = body.previousElementSibling;
+  const btn = header ? header.querySelector('.collapse-btn') : null;
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? 'block' : 'none';
+  if (btn) btn.textContent = collapsed ? '收起 ▲' : '展开 ▼';
+}
+
+function downloadWinnersTemplate() {
+  const csv = '\uFEFF作者ID,作者小红书号\nAUTHOR001,xhs_user001\nAUTHOR002,xhs_user002';
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='获奖名单示例.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+// ========== AUTHOR QUERY ==========
+// ========== AUTHOR TAB SYSTEM ==========
+let authorCurrentTab = 'whitelist';
+
+function authorTab(tab) {
+  authorCurrentTab = tab;
+  ['whitelist','winners','objection'].forEach((t, i) => {
+    const tabEl = document.querySelectorAll('#author-tabs .tab')[i];
+    const panelEl = document.getElementById('author-tab-' + t);
+    if (tabEl) tabEl.classList.toggle('active', t === tab);
+    if (panelEl) panelEl.style.display = t === tab ? 'block' : 'none';
+  });
+  if (tab === 'objection') { renderAuthorObjStatus(); renderAuthorObjectionForm(); }
+}
+
+// ---- Tab1: 白名单查询 ----
+function doAuthorWLQuery() {
+  const query = document.getElementById('author-wl-query-input').value.trim();
+  if (!query) { toast('请输入小红书号或作者ID'); return; }
+  const resultEl = document.getElementById('author-wl-query-result');
+  resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#aaa">⏳ 正在查询...</div>';
+  syncFromRemote().catch(()=>{}).finally(() => {
+    const acts = Object.values(getActivities()).filter(a => a.ip === 'sky');
+    if (!acts.length) {
+      resultEl.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>暂无活动</div></div>';
+      return;
+    }
+    const matches = (item, q) => {
+      const ql = q.toLowerCase();
+      return (item.authorId||'').toLowerCase().includes(ql) || (item.xhsId||'').toLowerCase().includes(ql);
+    };
+    let html = '';
+    acts.forEach(act => {
+      if (!act.whitelist || !act.whitelist.length) {
+        html += `<div class="section" style="margin-bottom:12px">
+          <div style="font-weight:700;margin-bottom:8px">${act.name}</div>
+          <span style="color:#aaa;font-size:13px">⏳ 白名单尚未公示</span>
+        </div>`;
+        return;
+      }
+      const inWL = act.whitelist.some(item => matches(item, query));
+      const isOpen = !act.wlDeadline || Date.now() < new Date(act.wlDeadline).getTime();
+      const isClosed = act.wlClosed;
+      const badge = inWL
+        ? '<span style="color:#389e0d;font-weight:700;font-size:14px">✅ 在白名单中</span>'
+        : '<span style="color:#f5222d;font-weight:700;font-size:14px">❌ 不在白名单中</span>';
+      const deadlineInfo = isClosed
+        ? '<span style="font-size:12px;color:#f5222d">⛔ 异议已关闭</span>'
+        : act.wlDeadline
+          ? `<span style="font-size:12px;color:${isOpen?'#389e0d':'#aaa'}">${isOpen?'⏰':'⌛'} 异议截止：${act.wlDeadline.replace('T',' ')}</span>`
+          : '<span style="font-size:12px;color:#aaa">异议开放中</span>';
+      const canObjection = !inWL && isOpen && !isClosed && act.whitelist.length > 0;
+      html += `<div class="section" style="margin-bottom:12px" id="author-wl-card-${act.id}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+          <div style="font-weight:700;font-size:15px">${act.name}</div>
+          ${badge}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          ${deadlineInfo}
+          ${canObjection ? `<button class="btn btn-outline btn-sm" onclick="startObjectionFromWL('${act.id}','whitelist','${encodeURIComponent(query)}')">提交白名单异议</button>` : ''}
+        </div>
+      </div>`;
+    });
+    resultEl.innerHTML = html || '<div class="empty"><div class="empty-icon">📋</div><div>暂无活动</div></div>';
+  });
+}
+
+// ---- Tab2: 获奖查询 ----
+function doAuthorWinnerQuery() {
+  const query = document.getElementById('author-winner-query-input').value.trim();
+  if (!query) { toast('请输入小红书号或作者ID'); return; }
+  const resultEl = document.getElementById('author-winner-query-result');
+  resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#aaa">⏳ 正在查询...</div>';
+  syncFromRemote().catch(()=>{}).finally(() => {
+    const acts = Object.values(getActivities()).filter(a => a.ip === 'sky');
+    if (!acts.length) {
+      resultEl.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div>暂无活动</div></div>';
+      return;
+    }
+    const matches = (item, q) => {
+      const ql = q.toLowerCase();
+      return (item.authorId||'').toLowerCase().includes(ql) || (item.xhsId||'').toLowerCase().includes(ql);
+    };
+    let html = '';
+    acts.forEach(act => {
+      const wp = act.winnersPublish || {};
+      if (!wp.approvedAt) {
+        html += `<div class="section" style="margin-bottom:12px">
+          <div style="font-weight:700;margin-bottom:8px">${act.name}</div>
+          <span style="color:#aaa;font-size:13px">⏳ 获奖公示尚未发布</span>
+        </div>`;
+        return;
+      }
+      const list = wp.list || [];
+      const inList = list.some(item => matches(item, query));
+      const badge = inList
+        ? '<span style="color:#fa8c16;font-weight:700;font-size:14px">🏆 恭喜获奖！</span>'
+        : '<span style="color:#666;font-size:13px">本次未获奖</span>';
+      const deadlineInfo = wp.deadline
+        ? `<div style="font-size:12px;color:var(--gray)">公示截止：${wp.deadline.replace('T',' ')}</div>`
+        : '';
+      html += `<div class="section" style="margin-bottom:12px" id="author-winner-card-${act.id}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+          <div style="font-weight:700;font-size:15px">${act.name}</div>
+          ${badge}
+        </div>
+        ${deadlineInfo}
+        ${wp.link ? `<div style="margin-top:8px"><a href="${wp.link}" target="_blank" style="color:var(--red);font-size:13px">📄 查看完整获奖公示 →</a></div>` : ''}
+        ${wp.note ? `<div style="font-size:12px;color:var(--gray);margin-top:6px">${wp.note}</div>` : ''}
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <button class="btn btn-outline btn-sm" onclick="startObjectionFromWL('${act.id}','winner','${encodeURIComponent(query)}')">💬 对本次获奖结果有异议？</button>
+        </div>
+      </div>`;
+    });
+    resultEl.innerHTML = html || '<div class="empty"><div class="empty-icon">🏆</div><div>暂无活动</div></div>';
+  });
+}
+
+// ---- Tab3: 提交&查看异议 ----
+
+// 查看异议回复版块
+function renderAuthorObjStatus() {
+  const el = document.getElementById('author-obj-status-wrap');
+  if (!el) return;
+  const statusLabel = { pending:'待处理', approved:'已通过', rejected:'已拒绝', vendor_pending:'处理中' };
+  const statusColor = { pending:'#fa8c16', approved:'#389e0d', rejected:'#f5222d', vendor_pending:'#d46b08' };
+
+  el.innerHTML = `
+    <div class="section" style="margin-bottom:16px">
+      <div class="section-title">🔎 查看异议回复</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:12px">输入您的作者ID，查看已提交的异议及处理结果</div>
+      <div class="search-bar">
+        <input type="text" class="search-input" id="obj-status-query-input"
+          placeholder="请输入您的24位作者ID"
+          onkeydown="if(event.key==='Enter')doAuthorObjStatusQuery()">
+        <button class="btn btn-primary" onclick="doAuthorObjStatusQuery()" style="white-space:nowrap">查询</button>
+      </div>
+      <div id="author-obj-status-result" style="margin-top:12px"></div>
+    </div>`;
+}
+
+function doAuthorObjStatusQuery() {
+  const q = (document.getElementById('obj-status-query-input')?.value||'').trim();
+  const el = document.getElementById('author-obj-status-result');
+  if (!q) { el.innerHTML = '<div style="color:#f5222d;font-size:13px">请输入作者ID</div>'; return; }
+
+  const statusLabel = { pending:'待处理', approved:'已通过', rejected:'已拒绝', vendor_pending:'处理中' };
+  const statusColor = { pending:'#fa8c16', approved:'#389e0d', rejected:'#f5222d', vendor_pending:'#d46b08' };
+
+  // 遍历所有光遇活动的异议
+  const acts = Object.values(getActivities()).filter(a => a.ip === 'sky');
+  const found = [];
+
+  acts.forEach(act => {
+    (act.whitelistObjections||[]).forEach(o => {
+      if (o.authorId === q) found.push({...o, actName: act.name, objType: 'whitelist'});
+    });
+    (act.winnerObjections||[]).forEach(o => {
+      if (o.authorId === q) found.push({...o, actName: act.name, objType: 'winner'});
+    });
+  });
+
+  if (!found.length) {
+    el.innerHTML = '<div class="alert alert-info">未找到该作者ID提交的异议记录，请确认ID填写正确</div>';
+    return;
+  }
+
+  // 按时间倒序排序
+  found.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+
+  el.innerHTML = found.map(o => {
+    const typeLabel = o.objType === 'whitelist' ? '白名单异议' : '获奖异议';
+    const st = o.status || 'pending';
+    const stLabel = statusLabel[st] || st;
+    const stColor = statusColor[st] || '#999';
+
+    // 回复内容：通过/拒绝才显示，不透露是谁处理的
+    let replyHtml = '';
+    if (st === 'approved') {
+      const replyText = o.reply || o.vendorReply || '';
+      replyHtml = `<div style="margin-top:8px;padding:10px 12px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;font-size:13px">
+        <span style="color:#389e0d;font-weight:600">✅ 异议已通过</span>
+        ${replyText ? `<div style="color:#555;margin-top:4px">${replyText}</div>` : '<div style="color:#555;margin-top:4px">您的异议已通过审核，请前往白名单/获奖公示页查询最新结果。</div>'}
+      </div>`;
+    } else if (st === 'rejected') {
+      const reasonText = o.rejectReason ? `拒绝理由：${o.rejectReason}` : '异议未通过审核，请确认拒交信息是否正确';
+      replyHtml = `<div style="margin-top:8px;padding:10px 12px;background:#fff1f0;border:1px solid #ffa39e;border-radius:6px;font-size:13px">
+        <span style="color:#f5222d;font-weight:600">❌ 异议未通过</span>
+        <div style="color:#555;margin-top:4px">${reasonText}</div>
+      </div>`;
+    } else if (st === 'vendor_pending') {
+      const vReply = o.vendorReply;
+      if (vReply) {
+        replyHtml = `<div style="margin-top:8px;padding:10px 12px;background:#fff7e6;border:1px solid #ffd591;border-radius:6px;font-size:13px">
+          <span style="color:#d46b08;font-weight:600">💬 已收到回复</span>
+          <div style="color:#555;margin-top:4px">${vReply}</div>
+        </div>`;
+      } else {
+        replyHtml = `<div style="margin-top:8px;padding:8px 12px;background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;font-size:12px;color:#ad6800">正在进一步确认中，请耐心等待</div>`;
+      }
+    } else {
+      replyHtml = `<div style="margin-top:8px;padding:8px 12px;background:#fafafa;border:1px solid var(--border);border-radius:6px;font-size:12px;color:#999">待运营处理，一般 1-3 个工作日内回复</div>`;
+    }
+
+    return `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:12px;font-weight:600;background:#f0f0f0;padding:2px 8px;border-radius:4px">${typeLabel}</span>
+            <span style="font-size:12px;color:var(--gray)">${o.actName}</span>
+          </div>
+          <span style="font-size:12px;font-weight:600;color:${stColor}">${stLabel}</span>
+        </div>
+        <div style="font-size:13px;color:#555;margin-bottom:4px">异议原因：${o.reason||'-'}</div>
+        <div style="font-size:12px;color:#aaa">提交时间：${fmtDate(o.createdAt)}</div>
+        ${replyHtml}
+      </div>`;
+  }).join('');
+}
+
+function renderAuthorObjectionForm() {
+  const el = document.getElementById('author-objection-form-wrap');
+  const acts = Object.values(getActivities()).filter(a => a.ip === 'sky');
+  let html = `
+    <div class="section" style="margin-bottom:16px">
+      <div class="section-title">提交异议</div>
+      <div class="alert alert-warn">⚠️ <b>提交前必读：</b>作者ID 和 小红书号请填写正确，填写错误运营将默认该异议无需处理。</div>
+      ${!acts.length ? '<div style="color:#aaa;font-size:13px">暂无可提交异议的活动</div>' : `
+      <div class="form-group">
+        <label>选择活动 <span style="color:var(--red)">*</span></label>
+        <select class="form-select" id="obj-act-select" onchange="renderAuthorObjectionActSection()">
+          <option value="">-- 请选择活动 --</option>
+          ${acts.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+        </select>
+      </div>
+      <div id="author-obj-act-section"></div>
+      `}
+    </div>`;
+  el.innerHTML = html;
+}
+
+function renderAuthorObjectionActSection() {
+  const actId = document.getElementById('obj-act-select').value;
+  const el = document.getElementById('author-obj-act-section');
+  if (!actId) { el.innerHTML = ''; return; }
+  const act = getActivity(actId);
+  if (!act) { el.innerHTML = ''; return; }
+
+  const isWLOpen = !act.wlClosed && (!act.wlDeadline || Date.now() < new Date(act.wlDeadline).getTime());
+  const isWinnersPublished = !!(act.winnersPublish && act.winnersPublish.approvedAt);
+
+  let canTypes = [];
+  if (act.whitelist && act.whitelist.length > 0 && isWLOpen) canTypes.push({v:'whitelist', l:'白名单异议（我应该在白名单中）'});
+  if (isWinnersPublished) canTypes.push({v:'winner', l:'获奖异议（对获奖结果有异议）'});
+
+  if (!canTypes.length) {
+    el.innerHTML = '<div class="alert alert-info" style="margin-top:8px">ℹ️ 当前活动暂无可提交的异议类型（白名单异议已关闭或获奖公示未发布）</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="form-group">
+      <label>作者ID <span style="color:var(--red)">*</span>（24位字母数字）</label>
+      <input type="text" class="form-input" id="obj-author-id-main" placeholder="请填写您的作者ID（24位）">
+      <div style="font-size:12px;color:#999;margin-top:4px">⚠️ 请确认填写正确，填写错误默认不处理该异议</div>
+    </div>
+    <div class="form-group">
+      <label>小红书号 <span style="color:var(--red)">*</span></label>
+      <input type="text" class="form-input" id="obj-xhs-id-main" placeholder="请填写您的小红书号">
+      <div style="font-size:12px;color:#999;margin-top:4px">⚠️ 请确认填写正确，填写错误默认不处理该异议</div>
+    </div>
+    <div class="form-group">
+      <label>异议类型 <span style="color:var(--red)">*</span></label>
+      <select class="form-select" id="obj-type-main">
+        <option value="">-- 请选择 --</option>
+        ${canTypes.map(t => `<option value="${t.v}">${t.l}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>异议原因 <span style="color:var(--red)">*</span></label>
+      <textarea class="form-textarea" id="obj-reason-main" placeholder="请详细描述您的异议原因，包括参与活动的证明信息"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="submitAuthorObjectionMain('${actId}')" style="width:100%">提交异议</button>
+  `;
+}
+
+function submitAuthorObjectionMain(actId) {
+  const act = getActivity(actId);
+  if (!act) { toast('活动不存在'); return; }
+  const authorId = document.getElementById('obj-author-id-main').value.trim();
+  const xhsId = document.getElementById('obj-xhs-id-main').value.trim();
+  const type = document.getElementById('obj-type-main').value;
+  const reason = document.getElementById('obj-reason-main').value.trim();
+  if (!authorId) { toast('请填写作者ID'); return; }
+  if (authorId.length !== 24) { toast('作者ID必须为24位'); return; }
+  if (!/^[A-Za-z0-9]+$/.test(authorId)) { toast('作者ID只能包含字母和数字'); return; }
+  if (!xhsId) { toast('请填写小红书号'); return; }
+  if (!type) { toast('请选择异议类型'); return; }
+  if (!reason) { toast('请填写异议原因'); return; }
+  const obj = {
+    id: genId(),
+    submittedBy: '',
+    requesterName: xhsId,
+    xhsLink: '',
+    xhsId,
+    authorId,
+    reason,
+    status: 'pending',
+    reply: '',
+    rejectReason: '',
+    createdAt: now()
+  };
+  if (type === 'whitelist') {
+    if (!act.whitelistObjections) act.whitelistObjections = [];
+    act.whitelistObjections.push(obj);
+    toast('✅ 白名单异议已提交，请等待运营处理');
+  } else {
+    if (!act.winnerObjections) act.winnerObjections = [];
+    act.winnerObjections.push(obj);
+    toast('✅ 获奖异议已提交，请等待运营处理');
+  }
+  saveActivity(act);
+  // 清空表单
+  document.getElementById('obj-author-id-main').value = '';
+  document.getElementById('obj-xhs-id-main').value = '';
+  document.getElementById('obj-type-main').value = '';
+  document.getElementById('obj-reason-main').value = '';
+}
+
+// 从白名单/获奖 Tab 跳到异议 Tab 并预填
+function startObjectionFromWL(actId, type, queryEncoded) {
+  authorTab('objection');
+  // 渲染后预选活动和类型
+  setTimeout(() => {
+    const sel = document.getElementById('obj-act-select');
+    if (sel) {
+      sel.value = actId;
+      renderAuthorObjectionActSection();
+      setTimeout(() => {
+        const typeSel = document.getElementById('obj-type-main');
+        if (typeSel) typeSel.value = type;
+        // 不预填小红书号，让作者自行确认填写
+      }, 50);
+    }
+  }, 100);
+}
+
+// 旧函数兼容（doAuthorQuery 已拆分为三 Tab，此处保留空实现避免报错）
+function doAuthorQuery() { doAuthorWLQuery(); }
+function toggleAuthorObjectionForm() {}
+function submitAuthorObjection() {}
+function _doAuthorQueryRender() {}
+
+
+// ========== INIT ==========
+(function init() {
+  const hash = window.location.hash.replace('#','');
+  const valid = ['ops','vendor','author'];
+  // Hash = login-xxx → direct to login sub-screen (no session needed)
+  const loginScreens = ['login-ops','login-vendor','login-author'];
+  if (loginScreens.includes(hash)) {
+    const role = hash.replace('login-','');
+    document.getElementById('page-login').classList.add('active');
+    goLoginScreen(role);
+    return;
+  }
+  if (valid.includes(hash)) {
+    if (hash === 'author') {
+      // 查询页无需登录，直接显示
+      showPage('author');
+      return;
+    }
+    try {
+      const s = JSON.parse(sessionStorage.getItem('ecology_session_sky')||'{}');
+      if (s.role === hash) {
+        STATE.role = s.role;
+        STATE.ip = s.ip;
+        showPage(hash);
+        return;
+      }
+    } catch(e) {}
+    // Has valid hash but no session → go to that role's login screen
+    document.getElementById('page-login').classList.add('active');
+    goLoginScreen(hash);
+    return;
+  }
+  // Default: show login home
+  document.getElementById('page-login').classList.add('active');
+})();
+
+</script>
+</body>
+</html>
