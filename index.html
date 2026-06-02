@@ -838,6 +838,42 @@ function enterPage(role) {
   try { history.replaceState(null, '', '#' + role); } catch(e) {}
 }
 
+// ========== 自动轮询（15秒一次，三端数据实时互通）==========
+let _pollTimer = null;
+function startPolling() {
+  if (_pollTimer) return;
+  _pollTimer = setInterval(() => {
+    syncFromRemote().then(() => {
+      const role = STATE.role;
+      if (role === 'ops') {
+        if (typeof renderOpsActivities === 'function') renderOpsActivities();
+        if (typeof updateDataSummary === 'function') updateDataSummary();
+        if (typeof opsCurrentTab !== 'undefined') {
+          if (opsCurrentTab === 'whitelist' && typeof renderOpsWhitelist === 'function') renderOpsWhitelist();
+          if (opsCurrentTab === 'winners' && typeof renderOpsWinners === 'function') renderOpsWinners();
+          if (opsCurrentTab === 'objections' && typeof renderOpsObjections === 'function') renderOpsObjections();
+        }
+      } else if (role === 'vendor') {
+        const tab = vendorCurrentTab || 'activities';
+        const renderMap = {
+          activities: renderVendorActivities,
+          whitelist: renderVendorWhitelist,
+          notes: renderVendorNotes,
+          winners: renderVendorWinners,
+          objections: renderVendorObjections
+        };
+        if (renderMap[tab] && typeof renderMap[tab] === 'function') renderMap[tab]();
+      } else if (role === 'author') {
+        const tab = authorCurrentTab || 'whitelist';
+        if (tab === 'objection') { renderAuthorObjStatus(); renderAuthorObjectionForm(); }
+      }
+    }).catch(()=>{});
+  }, 15000);
+}
+function stopPolling() {
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+}
+
 function showPage(role) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+role).classList.add('active');
@@ -845,15 +881,20 @@ function showPage(role) {
     document.getElementById('ops-ip-tag').textContent = '运营';
     renderOpsActivities();
     updateDataSummary();
+    startPolling();
   } else if (role === 'vendor') {
     document.getElementById('vendor-ip-tag').textContent = IP_NAMES[STATE.ip];
     renderVendorActivities();
+    startPolling();
   } else if (role === 'author') {
     const _ait = document.getElementById('author-ip-tag'); if (_ait) _ait.textContent = STATE.ip ? IP_NAMES[STATE.ip] : '创作者';
     // 初始化作者端 Tab
     authorTab('whitelist');
+    startPolling();
   } else {
     document.getElementById('page-login').classList.add('active');
+    stopPolling();
+    return;
   }
   // 每次进入页面都从 D1 拉最新数据并重渲染
   syncFromRemote().then(() => {
