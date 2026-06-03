@@ -412,6 +412,7 @@ tr:hover td{background:#fafafa}
         <div class="search-bar">
           <input type="text" class="search-input" id="author-wl-query-input"
             placeholder="小红书号 / 作者ID（如 120202687 或 5e15e6be0000...）"
+            autocomplete="off"
             onkeydown="if(event.key==='Enter')doAuthorWLQuery()">
           <button class="btn btn-primary" onclick="doAuthorWLQuery()" style="white-space:nowrap">查询</button>
         </div>
@@ -427,6 +428,7 @@ tr:hover td{background:#fafafa}
         <div class="search-bar">
           <input type="text" class="search-input" id="author-winner-query-input"
             placeholder="小红书号 / 作者ID"
+            autocomplete="off"
             onkeydown="if(event.key==='Enter')doAuthorWinnerQuery()">
           <button class="btn btn-primary" onclick="doAuthorWinnerQuery()" style="white-space:nowrap">查询</button>
         </div>
@@ -3441,6 +3443,13 @@ function authorTab(tab) {
     if (tabEl) tabEl.classList.toggle('active', t === tab);
     if (panelEl) panelEl.style.display = t === tab ? 'block' : 'none';
   });
+  // 切 Tab 时清空输入框和查询结果，避免留存上一个人的信息
+  const clearMap = {
+    whitelist: ['author-wl-query-input', 'author-wl-query-result'],
+    winners:  ['author-winner-query-input', 'author-winner-query-result'],
+    objection: ['obj-status-query-input', 'author-obj-status-result']
+  };
+  (clearMap[tab] || []).forEach(id => { const el = document.getElementById(id); if (el) { if (el.tagName === 'INPUT') el.value = ''; else el.innerHTML = ''; } });
   if (tab === 'objection') { renderAuthorObjStatus(); renderAuthorObjectionForm(); }
   // 每次切 tab 都从 D1 拉最新数据
   syncFromRemote().then(() => {
@@ -3567,6 +3576,7 @@ function renderAuthorObjStatus() {
       <div class="search-bar">
         <input type="text" class="search-input" id="obj-status-query-input"
           placeholder="请输入您的24位作者ID"
+          autocomplete="off"
           onkeydown="if(event.key==='Enter')doAuthorObjStatusQuery()">
         <button class="btn btn-primary" onclick="doAuthorObjStatusQuery()" style="white-space:nowrap">查询</button>
       </div>
