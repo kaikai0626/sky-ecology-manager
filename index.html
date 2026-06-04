@@ -2923,19 +2923,21 @@ function renderVendorObjections() {
 }
 
 function vendorReplyObjection(actId, objId) {
-  const act = getActivity(actId);
-  const obj = (act.winnerObjections||[]).find(o => o.id === objId);
-  if (!obj) return;
   const reply = (document.getElementById('vendor-obj-reply-'+objId)?.value||'').trim();
   if (!reply) { toast('请填写回复内容'); return; }
-  obj.vendorReply = reply;
-  obj.vendorHandledAt = now();
-  obj.status = 'approved'; // mark resolved
-  obj.reply = reply; // also visible to author
-  obj.handledAt = now();
-  saveActivity(act);
-  renderVendorObjections();
-  toast('✅ 已回复作者');
+  syncFromRemote().catch(()=>{}).finally(() => {
+    const act = getActivity(actId);
+    const obj = (act.winnerObjections||[]).find(o => o.id === objId);
+    if (!obj) return;
+    obj.vendorReply = reply;
+    obj.vendorHandledAt = now();
+    obj.status = 'approved';
+    obj.reply = reply;
+    obj.handledAt = now();
+    saveActivity(act);
+    renderVendorObjections();
+    toast('✅ 已回复作者');
+  });
 }
 
 // ========== AUTHOR MAIN ==========
@@ -3352,23 +3354,29 @@ function submitObjection() {
     createdAt: now()
   };
 
-  if (type === 'whitelist') {
-    if (!act.whitelistObjections) act.whitelistObjections = [];
-    act.whitelistObjections.push(obj);
-  } else {
-    const winner = (act.winners||[]).find(w => matchWinner(w, user));
-    obj.name = user.username;
-    obj.originalAmount = winner ? winner.amount : '';
-    obj.finalAmount = '';
-    if (!act.winnerObjections) act.winnerObjections = [];
-    act.winnerObjections.push(obj);
-  }
-  saveActivity(act);
-  renderAuthorObjection();
-  document.getElementById('obj-reason').value = '';
-  if (document.getElementById('obj-author-id')) document.getElementById('obj-author-id').value = '';
-  if (document.getElementById('obj-xhs-id')) document.getElementById('obj-xhs-id').value = '';
-  toast('✅ 异议已提交，请等待运营处理');
+  // 提交前 sync 最新数据，防止覆盖其他端数据
+  const _subObj = obj, _subType = type, _subActId = actId;
+  syncFromRemote().catch(()=>{}).finally(() => {
+    const freshAct = getActivity(_subActId);
+    if (!freshAct) { toast('❌ 活动不存在，请刷新后重试'); return; }
+    if (_subType === 'whitelist') {
+      if (!freshAct.whitelistObjections) freshAct.whitelistObjections = [];
+      freshAct.whitelistObjections.push(_subObj);
+    } else {
+      const winner = (freshAct.winners||[]).find(w => matchWinner(w, user));
+      _subObj.name = user ? user.username : '';
+      _subObj.originalAmount = winner ? winner.amount : '';
+      _subObj.finalAmount = '';
+      if (!freshAct.winnerObjections) freshAct.winnerObjections = [];
+      freshAct.winnerObjections.push(_subObj);
+    }
+    saveActivity(freshAct);
+    renderAuthorObjection();
+    document.getElementById('obj-reason').value = '';
+    if (document.getElementById('obj-author-id')) document.getElementById('obj-author-id').value = '';
+    if (document.getElementById('obj-xhs-id')) document.getElementById('obj-xhs-id').value = '';
+    toast('✅ 异议已提交，请等待运营处理');
+  });
 }
 
 function renderOpsWinners() {
@@ -3743,6 +3751,10 @@ function renderAuthorObjectionActSection() {
 }
 
 function submitAuthorObjectionMain(actId) {
+  // 提交前先 sync，避免覆盖其他端数据
+  syncFromRemote().catch(()=>{}).finally(() => _doSubmitAuthorObjectionMain(actId));
+}
+function _doSubmitAuthorObjectionMain(actId) {
   const act = getActivity(actId);
   if (!act) { toast('活动不存在'); return; }
   const authorId = document.getElementById('obj-author-id-main').value.trim();
