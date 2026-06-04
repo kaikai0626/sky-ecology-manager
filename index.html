@@ -2614,10 +2614,19 @@ function saveVendorDetail() {
   act.timeline = act.timeline.filter(t => t.step !== 'detail_confirmed');
   syncActivityStatus(act);
 
-  saveActivity(act);
-  closeModal('modal-vendor-detail');
-  renderVendorActivities();
-  toast('✅ 活动细则已提交，等待运营确认');
+  // 提交前先 sync，避免覆盖其他端的改动
+  const _detailAct = act;
+  syncFromRemote().catch(()=>{}).finally(() => {
+    // 重新获取最新活动，只更新 detail 和 timeline，保留其他字段
+    const freshAct = getActivity(editingVendorActId) || _detailAct;
+    freshAct.detail = _detailAct.detail;
+    freshAct.timeline = _detailAct.timeline;
+    freshAct.status = _detailAct.status;
+    saveActivity(freshAct);
+    closeModal('modal-vendor-detail');
+    renderVendorActivities();
+    toast('✅ 活动细则已提交，等待运营确认');
+  });
 }
 
 function renderVendorNotes() {
@@ -2826,33 +2835,37 @@ function saveWinners() {
   if (!deadline) { toast('⚠️ 请填写公示截止时间'); return; }
   if (!winnersCount) { toast('⚠️ 请填写获奖人数'); return; }
   if (!link) { toast('⚠️ 请填写公示链接'); return; }
-  // 厂商必须上传获奖名单（运营不做强制，可追加）
   const isOpsMode = document.getElementById('upload-winners-btn').textContent === '保存公示信息';
   const prevList = (getActivity(editingWinnersActId)?.winnersPublish?.list || []);
   if (!isOpsMode && _winnersList === null && prevList.length === 0) {
     toast('⚠️ 请上传获奖名单 CSV，作者端查询依赖此名单'); return;
   }
-  const act = getActivity(editingWinnersActId);
-  const prevWp = act.winnersPublish || {};
-  act.winnersPublish = {
-    deadline,
-    winnersCount: parseInt(winnersCount, 10),
-    link,
-    note: document.getElementById('winners-note').value.trim(),
-    list: _winnersList !== null ? _winnersList : (prevWp.list || []),
-    submittedAt: now(),
-    approvedAt: null,
+  // 提交前先从 D1 拉最新数据，避免覆盖其他端的改动
+  const doSave = () => {
+    const act = getActivity(editingWinnersActId);
+    if (!act) { toast('❌ 活动不存在，请刷新后重试'); return; }
+    const prevWp = act.winnersPublish || {};
+    act.winnersPublish = {
+      deadline,
+      winnersCount: parseInt(winnersCount, 10),
+      link,
+      note: document.getElementById('winners-note').value.trim(),
+      list: _winnersList !== null ? _winnersList : (prevWp.list || []),
+      submittedAt: now(),
+      approvedAt: prevWp.approvedAt || null,
+    };
+    saveActivity(act);
+    closeModal('modal-upload-winners');
+    if (isOpsMode) {
+      renderOpsWinners();
+      toast('✅ 公示信息已保存');
+    } else {
+      renderVendorWinners();
+      toast('✅ 已提交给运营确认，等待发布');
+    }
   };
-  saveActivity(act);
-  closeModal('modal-upload-winners');
-  const isOps = document.getElementById('upload-winners-btn').textContent === '保存公示信息';
-  if (isOps) {
-    renderOpsWinners();
-    toast('✅ 公示信息已保存');
-  } else {
-    renderVendorWinners();
-    toast('✅ 已提交给运营确认，等待发布');
-  }
+  toast('⏳ 同步中...');
+  syncFromRemote().catch(()=>{}).finally(doSave);
 }
 
 function renderVendorObjections() {
