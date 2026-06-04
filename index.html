@@ -2786,10 +2786,17 @@ function parseWinnersListFile(input) {
     const text = ev.target.result.replace(/^\uFEFF/, '');
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     if (!lines.length) { toast('文件为空'); return; }
-    const sep = lines[0].includes('\t') ? '\t' : ',';
-    const headers = lines[0].split(sep).map(h => h.trim().replace(/"/g,''));
-    const idIdx = headers.findIndex(h => ['作者ID','用户群id','用户群ID'].includes(h));
-    const xhsIdx = headers.findIndex(h => ['作者小红书号','小红书号','小红书ID','小红书id','小红书用'].some(k => h.includes(k)));
+    const sep = lines[0].includes('\t') ? '\t' : (lines[0].includes(';') ? ';' : ',');
+    const headers = lines[0].split(sep).map(h => h.trim().replace(/"/g,'').replace(/\s/g,''));
+    const headersLower = headers.map(h => h.toLowerCase());
+    const idIdx = headers.findIndex((h,i) =>
+      ['作者ID','用户群id','用户群ID','作者id','authorid','author_id'].includes(h) ||
+      headersLower[i].includes('作者id') || headersLower[i].includes('authorid') || headersLower[i].includes('author_id')
+    );
+    const xhsIdx = headers.findIndex((h,i) =>
+      ['作者小红书号','小红书号','小红书ID','小红书id'].includes(h) ||
+      headersLower[i].includes('小红书') || headersLower[i].includes('xhs')
+    );
     const entries = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(sep).map(c => c.trim().replace(/"/g,''));
@@ -2798,7 +2805,8 @@ function parseWinnersListFile(input) {
       if (authorId || xhsId) entries.push({ authorId, xhsId });
     }
     _winnersList = entries;
-    document.getElementById('winners-list-status').textContent = `已解析 ${entries.length} 条记录`;
+    const statusMsg = entries.length > 0 ? `已解析 ${entries.length} 条记录` : `已解析 0 条（表头识别：作者ID列=${idIdx}, 小红书号列=${xhsIdx}，请确认CSV表头为「作者ID」和「作者小红书号」）`;
+    document.getElementById('winners-list-status').textContent = statusMsg;
     document.getElementById('winners-list-preview').innerHTML =
       entries.slice(0,3).map(e => `<div>作者ID: ${e.authorId||'-'} / 小红书号: ${e.xhsId||'-'}</div>`).join('') +
       (entries.length > 3 ? `<div>...共 ${entries.length} 条</div>` : '');
