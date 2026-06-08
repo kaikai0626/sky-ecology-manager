@@ -685,6 +685,17 @@ async function _remotePatchActivity(actId, actValue) {
     });
   } catch(e) {}
 }
+// 原子追加异议，防止多作者并发提交互相覆盖
+async function _remoteAppendObjection(actId, objType, objEntry) {
+  try {
+    const r = await fetch(API_BASE, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action: 'append_objection', key: 'ecology_data_sky_v1', actId, objType, objEntry })
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
 function _debouncedSync(key, value, ms=800) {
   // 保留签名兼容性，实际直接立即同步
   clearTimeout(_syncDebounce[key]);
@@ -3775,7 +3786,7 @@ function renderAuthorObjectionActSection() {
 }
 
 function submitAuthorObjectionMain(actId) {
-  // 提交前先 sync，避免覆盖其他端数据
+  // 直接调原子追加接口
   syncFromRemote().catch(()=>{}).finally(() => _doSubmitAuthorObjectionMain(actId));
 }
 function _doSubmitAuthorObjectionMain(actId) {
@@ -3804,16 +3815,15 @@ function _doSubmitAuthorObjectionMain(actId) {
     rejectReason: '',
     createdAt: now()
   };
-  if (type === 'whitelist') {
-    if (!act.whitelistObjections) act.whitelistObjections = [];
-    act.whitelistObjections.push(obj);
-    toast('✅ 白名单异议已提交，请等待运营处理');
-  } else {
-    if (!act.winnerObjections) act.winnerObjections = [];
-    act.winnerObjections.push(obj);
-    toast('✅ 获奖异议已提交，请等待运营处理');
-  }
-  saveActivity(act);
+  // 本地即时更新（不用等 D1 回响）
+  const field = type === 'whitelist' ? 'whitelistObjections' : 'winnerObjections';
+  if (!act[field]) act[field] = [];
+  if (!act[field].find(o => o.id === obj.id)) act[field].push(obj);
+  const _d = getData(); _d.activities[actId] = act;
+  localStorage.setItem('ecology_data_sky_v1', JSON.stringify(_d));
+  // 原子追加到 D1，不覆盖其他人的异议
+  _remoteAppendObjection(actId, type, obj);
+  toast(type === 'whitelist' ? '✅ 白名单异议已提交，请等待运营处理' : '✅ 获奖异议已提交，请等待运营处理');
   // 清空表单
   document.getElementById('obj-author-id-main').value = '';
   document.getElementById('obj-xhs-id-main').value = '';
