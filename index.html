@@ -675,6 +675,16 @@ async function _remoteSet(key, value) {
     });
   } catch(e) {}
 }
+// 原子局部更新单条活动，防止并发全量覆盖
+async function _remotePatchActivity(actId, actValue) {
+  try {
+    await fetch(API_BASE, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action: 'patch_activity', key: 'ecology_data_sky_v1', actId, actValue })
+    });
+  } catch(e) {}
+}
 function _debouncedSync(key, value, ms=800) {
   // 保留签名兼容性，实际直接立即同步
   clearTimeout(_syncDebounce[key]);
@@ -744,7 +754,10 @@ function saveActivity(act) {
   const data = getData();
   act.updatedAt = new Date().toISOString();
   data.activities[act.id] = act;
-  saveData(data);
+  // 本地 localStorage 仍全量存（保证本地读取一致）
+  localStorage.setItem('ecology_data_sky_v1', JSON.stringify(data));
+  // 远端只推单条活动（原子更新，防止并发覆盖）
+  _remotePatchActivity(act.id, act);
   // 实时更新运营端活动总控台列表（流程线）
   if (typeof opsCurrentTab !== 'undefined' && opsCurrentTab === 'activities' && typeof renderOpsActivities === 'function') {
     renderOpsActivities();
@@ -1060,7 +1073,10 @@ function deleteActivity(actId) {
   if (!confirm(`确认删除活动「${act.name}」？\n此操作不可撤销，活动数据（白名单、笔记、获奖名单）将全部删除。`)) return;
   const data = getData();
   delete data.activities[actId];
-  saveData(data);
+  // 本地全量更新
+  localStorage.setItem('ecology_data_sky_v1', JSON.stringify(data));
+  // 远端原子删除（传 null）
+  _remotePatchActivity(actId, null);
   renderOpsActivities();
   toast('✅ 活动已删除');
 }
