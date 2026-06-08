@@ -1368,6 +1368,10 @@ function advanceStep(step) {
       toast('❌ 厂商尚未提交获奖公示信息', 'error');
       return;
     }
+    if (!act.winnersPublish.approvedAt) {
+      toast('❌ 请先到「获奖公示」 Tab 点「确认发布」，运营确认后步骤才会自动更新', 'error');
+      return;
+    }
   }
   if (!act.timeline) act.timeline = [];
   // 自动补全前置步骤，保证流程线不跳过
